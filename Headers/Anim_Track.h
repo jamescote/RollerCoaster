@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "MeshManager.h"
 #include "TextureManager.h"
-#include "EdgeBuffer.h"
 #include <ctime>
 
 class Anim_Track 
@@ -22,8 +21,10 @@ public:
 	mat4 getFreNetFrames() { return m_m4CurrentFrenetFrame; }
 
 private:
+	void initializeTrack();
 	// Vector of Points on Curve
 	vector< vec3 > m_vKeyFrames, m_vTrackFrames[2];
+	string m_sContourFile, m_sMeshFile, m_sTextureFile;
 
 	//  Vertex Array and Buffer
 	GLuint m_iVertexArray, m_iVertexBuffer;
@@ -47,7 +48,6 @@ private:
 	// Rendering Members
 	Mesh* m_pMesh;
 	Texture* m_pTexture;
-	EdgeBuffer* m_pEdgeBuffer;
 
 	// Private Functions
 	void smoothCurve();

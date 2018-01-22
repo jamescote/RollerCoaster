@@ -44,7 +44,7 @@ int main()
 	{
 		// Set Error Callback and init window
 		glfwSetErrorCallback( ErrorCallback );
-		iRunning = initializeWindow( &m_Window, START_HEIGHT, START_WIDTH, "Rendering" );
+		iRunning = initializeWindow( &m_Window, START_HEIGHT, START_WIDTH, "Animation" );
 
 		#ifdef USING_LINUX
 				Magick::InitializeMagick("");	// Initializing Magick for Linux Only.

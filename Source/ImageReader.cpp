@@ -57,7 +57,7 @@ bool InitializeTexture(Texture *texture, const string &imageFileName)
     }
 
 	texture->genTexture( pixels, width, height, GL_BGRA, channelDataType );
-    
+
     return true;
 }
 

@@ -40,6 +40,8 @@ Plane::Plane( const vec3* pPosition,
 		m_pEdgeBuffer = new EdgeBuffer( m_iVertexArray );
 		m_pEdgeBuffer->GenerateAdjListStrip( m_pVertices, m_pNormals, m_pVertices.size() );
 	}
+	else
+		m_pEdgeBuffer = NULL;
 
 	if ( NULL == m_pTexture )
 		ShaderManager::getInstance()->setUniformBool( ShaderManager::eShaderType::PLANE_SHDR, "bTextureLoaded", false );
@@ -79,7 +81,7 @@ void Plane::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThresho
 	glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
 
 	// Render EdgeBuffer
-	if ( NULL != m_pEdgeBuffer )
+	if ( NULL != m_pEdgeBuffer ) 
 	{
 		m_pEdgeBuffer->CalculateEdgeBufferStrip( m_pNormals, &vCamLookAt );
 		m_pEdgeBuffer->drawEdgeBuffer( m_fScale, m_pPosition, fMinThreshold, fMaxThreshold );

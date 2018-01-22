@@ -58,6 +58,7 @@ Texture* TextureManager::loadTexture(const string& sFileName, long lID)
 
 		if ( !InitializeTexture( pContainer->pTexture, sFileName ) )
 		{
+			cout << "Failed to read texture: \"" << sFileName << "\"\n";
 			if( sFileName != "" )
 				cout << "Error, unable to load texture: " << sFileName << endl;
 			delete pContainer;

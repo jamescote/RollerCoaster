@@ -24,11 +24,43 @@
 Anim_Track::Anim_Track( long lID, const string* sContourFile, const string* pMeshLoc, 
 						const string* pTexLoc, bool bOpen )
 {
+	// Store generation values
 	m_lID = lID;
-
-	loadAnimTrack( *sContourFile );
-	assert( m_vKeyFrames.size() != 0 );
+	m_sContourFile = *sContourFile;
+	m_sMeshFile = *pMeshLoc;
+	m_sTextureFile = *pTexLoc;
 	m_bOpenCurve = bOpen;
+	
+	initializeTrack();
+}
+
+// Copy Constructor Overload
+Anim_Track::Anim_Track( const Anim_Track& pRHS )
+{
+	// Utilize operator= overload.
+	(*this) = pRHS;
+}
+
+// Assignment operator overload.
+Anim_Track& Anim_Track::operator=( const Anim_Track& pRHS )
+{
+	// Copy over initialization parameters
+	this->m_lID = pRHS.m_lID;
+	this->m_sContourFile = pRHS.m_sContourFile;
+	this->m_sMeshFile = pRHS.m_sMeshFile;
+	this->m_sTextureFile = pRHS.m_sTextureFile;
+	this->m_bOpenCurve = pRHS.m_bOpenCurve;
+
+	// Initialize Track based on same input files.
+	initializeTrack();
+
+	return (*this);
+}
+
+void Anim_Track::initializeTrack()
+{
+	loadAnimTrack( m_sContourFile );
+	assert( m_vKeyFrames.size() != 0 );
 	m_fCurrDist = 0.f;
 	m_fCurrHeight = m_vKeyFrames.front().y;
 	m_eCurrentState = LIFTING_STATE;
@@ -36,107 +68,23 @@ Anim_Track::Anim_Track( long lID, const string* sContourFile, const string* pMes
 	// Create Vertex Array for Rendering Track
 	glGenVertexArrays( 1, &m_iVertexArray );
 
-	if ( *pMeshLoc != "" )
+	// Load a Mesh if mesh is specified.
+	if ( !m_sMeshFile.empty() )
 	{
-		m_pMesh = MeshManager::getInstance()->loadMesh( *pMeshLoc, m_lID );
+		m_pMesh = MeshManager::getInstance()->loadMesh( m_sMeshFile, m_lID );
 
 		if ( NULL != m_pMesh )
 			m_pMesh->initMesh();
 	}
+	else m_pMesh = NULL;
 
-	if ( *pTexLoc != "" )
-		m_pTexture = TextureManager::getInstance()->loadTexture( *pTexLoc, m_lID );
+	if ( !m_sTextureFile.empty() )
+		m_pTexture = TextureManager::getInstance()->loadTexture( m_sTextureFile, m_lID );
+	else m_pTexture = NULL;
 
 	// Generate Vertex buffer for curve.
 	m_iVertexBuffer = ShaderManager::getInstance()->genVertexBuffer( m_iVertexArray, 0, 3, m_vKeyFrames.data(), m_vKeyFrames.size() * sizeof( vec3 ), GL_STATIC_DRAW );
 }
-
-// Copy Constructor Overload
-Anim_Track::Anim_Track( const Anim_Track& pRHS )
-{
-	m_vKeyFrames.assign( pRHS.m_vKeyFrames.begin(), pRHS.m_vKeyFrames.end() );
-	for( int i = 0; i < 2; ++i )
-		m_vTrackFrames[i].assign( pRHS.m_vTrackFrames[ i ].begin(), pRHS.m_vTrackFrames[ i ].end() );
-
-	// Generate Vertex Array and Buffer for curve.
-	glGenVertexArrays( 1, &m_iVertexArray );
-	m_iVertexBuffer = ShaderManager::getInstance()->genVertexBuffer( m_iVertexArray, 0, 3, m_vKeyFrames.data(), m_vKeyFrames.size() * sizeof( vec3 ), GL_STATIC_DRAW );
-
-	m_fCurveLength = pRHS.m_fCurveLength;
-	m_lID = pRHS.m_lID;
-	m_fCurrDist = pRHS.m_fCurrDist;
-	m_fDistToFreeFall = pRHS.m_fDistToFreeFall;
-	m_fCurrHeight = pRHS.m_fCurrHeight;
-	m_fMaxHeight = pRHS.m_fMaxHeight;
-	m_fMinHeight = pRHS.m_fMinHeight;
-	m_eCurrentState = pRHS.m_eCurrentState;
-	m_vDecelStartPosition = pRHS.m_vDecelStartPosition;
-	m_m4CurrentFrenetFrame = pRHS.m_m4CurrentFrenetFrame;
-
-	m_bOpenCurve = pRHS.m_bOpenCurve;
-
-	if ( NULL != pRHS.m_pMesh )
-		m_pMesh = MeshManager::getInstance()->loadMesh( pRHS.m_pMesh->getFileName(), m_lID );
-
-	if ( NULL != pRHS.m_pTexture )
-		m_pTexture = TextureManager::getInstance()->loadTexture( pRHS.m_pTexture->getFileName(), m_lID );
-
-	if ( NULL != pRHS.m_pEdgeBuffer )
-		m_pEdgeBuffer = new EdgeBuffer( m_iVertexArray );
-}
-
-// Assignment operator overload.
-Anim_Track& Anim_Track::operator=( const Anim_Track& pRHS )
-{
-	this->m_vKeyFrames.assign( pRHS.m_vKeyFrames.begin(), pRHS.m_vKeyFrames.end() );
-	for ( int i = 0; i < 2; ++i )
-		this->m_vTrackFrames[ i ].assign( pRHS.m_vTrackFrames[ i ].begin(), pRHS.m_vTrackFrames[ i ].end() );
-
-	// Generate Vertex Array and Buffer for curve.
-	glGenVertexArrays( 1, &this->m_iVertexArray );
-	this->m_iVertexBuffer = ShaderManager::getInstance()->genVertexBuffer( this->m_iVertexArray, 0, 3, this->m_vKeyFrames.data(), this->m_vKeyFrames.size() * sizeof( vec3 ), GL_STATIC_DRAW );
-
-	this->m_fCurveLength = pRHS.m_fCurveLength;
-	this->m_lID	= pRHS.m_lID;
-	this->m_fCurrDist = pRHS.m_fCurrDist;
-	this->m_fDistToFreeFall = pRHS.m_fDistToFreeFall;
-	this->m_bOpenCurve = pRHS.m_bOpenCurve;
-	this->m_fCurrHeight = pRHS.m_fCurrHeight;
-	this->m_fMaxHeight = pRHS.m_fMaxHeight;
-	this->m_fMinHeight = pRHS.m_fMinHeight;
-	this->m_eCurrentState = pRHS.m_eCurrentState;
-	this->m_vDecelStartPosition = pRHS.m_vDecelStartPosition;
-	this->m_m4CurrentFrenetFrame = pRHS.m_m4CurrentFrenetFrame;
-
-	if ( NULL != pRHS.m_pMesh )
-	{	
-		if ( NULL != this->m_pMesh )
-			MeshManager::getInstance()->unloadMesh( m_pMesh->getFileName(), m_lID );
-
-		this->m_pMesh = MeshManager::getInstance()->loadMesh( pRHS.m_pMesh->getFileName(), pRHS.m_lID );
-	}
-
-	if ( NULL != pRHS.m_pTexture )
-	{
-		if ( NULL != this->m_pTexture )
-			TextureManager::getInstance()->unloadTexture( m_pTexture->getFileName(), m_lID );
-		
-		this->m_pTexture = TextureManager::getInstance()->loadTexture( pRHS.m_pTexture->getFileName(), pRHS.m_lID );
-	}
-
-	if ( NULL != pRHS.m_pEdgeBuffer )
-	{
-		if ( NULL != m_pEdgeBuffer )
-			delete this->m_pEdgeBuffer;
-
-		this->m_pEdgeBuffer = new EdgeBuffer( m_iVertexArray );
-	}
-
-	this->m_lID = pRHS.m_lID;
-
-	return (*this);
-}
-
 
 // Destructor
 Anim_Track::~Anim_Track()
@@ -146,9 +94,6 @@ Anim_Track::~Anim_Track()
 
 	if ( NULL != m_pTexture )
 		TextureManager::getInstance()->unloadTexture( m_pTexture->getFileName(), m_lID );
-
-	if ( NULL != m_pEdgeBuffer )
-		delete m_pEdgeBuffer;
 
 	glDeleteBuffers( 1, &m_iVertexBuffer );
 	glDeleteVertexArrays( 1, &m_iVertexArray );
@@ -167,22 +112,27 @@ void Anim_Track::loadAnimTrack( const string& pContourFile )
 	using std::stringstream;
 	using std::istream_iterator;
 
+	// Set up input stream
 	std::ifstream file( pContourFile );
 
+	// Error opening file.
 	if ( !file )
 	{
 		cout << "Could not open " << pContourFile << " for Animation Track." << endl;
 		return;
 	}
 
+	// Local Variables.
 	vec3 v;
 	string line;
 	size_t index;
 	stringstream ss( std::ios_base::in );
-
 	size_t lineNum = 0;
+
+	// Clear keyframes
 	m_vKeyFrames.clear();
 
+	// Get line by line
 	while ( getline( file, line ) )
 	{
 		++lineNum;
@@ -207,13 +157,16 @@ void Anim_Track::loadAnimTrack( const string& pContourFile )
 			continue; // empty or commented out line
 		}
 
+		// read line into string stream and clear any flags
 		ss.str( line );
 		ss.clear();
 
+		// store the position into the vec3f
 		ss >> v.x;
 		ss >> v.y;
 		ss >> v.z;
 
+		// No issues, store the position
 		if ( ss.good() )
 			m_vKeyFrames.push_back( v );
 	}
@@ -249,6 +202,7 @@ void Anim_Track::draw( )
 
 	// Upload new Indices
 #ifdef DEBUG	// For Debugging
+	vec3 vColor( 0.5 );
 	glPointSize( 10.f );
 	glUseProgram( ShaderManager::getInstance()->getProgram( ShaderManager::eShaderType::WORLD_SHDR ) );
 	vector< vec3 > vTemps = { vec3( 0.0f ), getPosition() };
@@ -261,7 +215,7 @@ void Anim_Track::draw( )
 	vTemps.push_back( vec3( m_m4CurrentFrenetFrame[ 3 ] ) );
 	vTemps.push_back( vec3( m_m4CurrentFrenetFrame[ 3 ] ) + getCentripetalAcce() );
 	glBufferData( GL_ARRAY_BUFFER, vTemps.size() * sizeof( vec3 ), vTemps.data(), GL_DYNAMIC_DRAW );
-	ShaderManager::getInstance()->setUniformVec3( ShaderManager::eShaderType::WORLD_SHDR, "vColor", &vec3( 0.5 ) );
+	ShaderManager::getInstance()->setUniformVec3( ShaderManager::eShaderType::WORLD_SHDR, "vColor", &vColor );
 	//glDrawArrays( GL_POINTS, 0, vTemps.size() );
 	//glDrawArrays( GL_LINES, 0, vTemps.size() );
 

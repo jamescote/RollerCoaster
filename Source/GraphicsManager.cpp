@@ -101,7 +101,6 @@ void GraphicsManager::RenderScene()
 
 	//renderAxis();
 	m_pEnvMngr->renderEnvironment( vCamLookAt );
-
 	glDisable(GL_DEPTH_TEST);
 }
 

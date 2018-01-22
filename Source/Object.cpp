@@ -6,12 +6,14 @@ Object::Object( const vec3* pPos, long lID, const string* sTexName, const Anim_T
 {
 	m_pPosition = *pPos;
 	m_lID = lID;
-	m_pTexture = TextureManager::getInstance()->loadTexture( *sTexName, lID );
+
+	if( !sTexName->empty() )
+		m_pTexture = TextureManager::getInstance()->loadTexture( *sTexName, lID );
+	else m_pTexture = NULL;
 
 	if ( NULL != pAnimTrack )
 		m_pAnimTrack = new Anim_Track( *pAnimTrack );
-
-	cout << "exited Texture creation" << endl;
+	else m_pAnimTrack = NULL;
 }
 
 // Copy Constructor
@@ -22,6 +24,7 @@ Object::Object( const Object* pCopy )
 
 	if ( NULL != m_pTexture )
 		TextureManager::getInstance()->unloadTexture( m_pTexture->getFileName(), m_lID );
+	else m_pTexture = NULL;
 
 	m_pAnimTrack = pCopy->m_pAnimTrack;
 }

@@ -92,16 +92,12 @@ void EnvironmentManager::listEnvironment()
 	for ( vector<Object3D*>::iterator pIter = m_pObjects.begin();
 		  pIter != m_pObjects.end();
 		  ++pIter )
-	{
 		cout << "\t" << (*pIter)->getDebugOutput() << endl;
-	}
 
 	for ( vector<Light*>::iterator pIter = m_pLights.begin();
 		  pIter != m_pLights.end();
 		  ++pIter )
-	{
 		cout << "\t" << (*pIter)->getDebugOutput() << endl;
-	}
 
 	cout << endl;
 }
@@ -115,9 +111,7 @@ void EnvironmentManager::purgeEnvironment()
 		  ++pIter )
 	{
 		if ( NULL != (*pIter) )
-		{
 			delete (*pIter);
-		}
 	}
 
 	// Clean up Lights
@@ -126,9 +120,7 @@ void EnvironmentManager::purgeEnvironment()
 		  ++pIter )
 	{
 		if ( NULL != (*pIter) )
-		{
 			delete (*pIter);
-		}
 	}
 
 	// Clear the array of Dangling pointers
@@ -138,25 +130,28 @@ void EnvironmentManager::purgeEnvironment()
 
 void EnvironmentManager::renderEnvironment( const vec3& vCamLookAt )
 {
+	// Local Variables
 	ShaderManager* pShdrMngr = ShaderManager::getInstance();
 	vec3 pLightPosition;
 
+	// Calculate information for each Light in the scene (Current max = 1)
 	for (vector<Light*>::iterator pLightIter = m_pLights.begin();
 		pLightIter != m_pLights.end();
 		++pLightIter)
 	{
 		pLightPosition = (*pLightIter)->getPosition();
 
+		// Store Information to all Shaders
 		pShdrMngr->setUniformVec3( ShaderManager::eShaderType::LIGHT_SHDR, "lightPosition", &pLightPosition );
 		pShdrMngr->setUniformVec3( ShaderManager::eShaderType::MESH_SHDR, "lightPosition",  &pLightPosition );
 		pShdrMngr->setUniformVec3( ShaderManager::eShaderType::PLANE_SHDR, "lightPosition", &pLightPosition );
 
 		//(*pLightIter)->draw( vCamLookAt );
-		for (vector<Object3D*>::iterator pIter = m_pObjects.begin();
+		for ( vector<Object3D*>::iterator pIter = m_pObjects.begin();
 			pIter != m_pObjects.end();
-			++pIter)
+			++pIter )
 		{
-			if (NULL != (*pIter))
+			if ( NULL != (*pIter) )
 				(*pIter)->draw( vCamLookAt, m_fMinEdgeThreshold, m_fMaxEdgeThreshold );
 		}
 	}

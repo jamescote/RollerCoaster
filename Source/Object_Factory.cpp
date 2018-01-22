@@ -27,6 +27,9 @@ Object_Factory* Object_Factory::m_pInstance = NULL;
 Object_Factory::Object_Factory()
 {
 	m_lNextID = 0;
+
+	m_pAnimProperty = NULL;
+	m_sMeshProperty = m_sTextureProperty = "";
 }
 
 // Returns the singleton instance of the Object Factory

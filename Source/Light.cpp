@@ -10,7 +10,6 @@ Light::Light(const glm::vec3* pPos,
 {
 	m_pColor		= (*pColor);
 	EnvironmentManager::getInstance()->addLight( this );
-
 	glGenVertexArrays(1, &m_iVertexArray);
 
 	m_iVertexBuffer = ShaderManager::getInstance()->genVertexBuffer(m_iVertexArray,

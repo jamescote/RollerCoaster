@@ -39,6 +39,7 @@ private:
 	{ 
 		if ( NULL != m_pAnimProperty )
 			delete m_pAnimProperty;
+
 		m_pAnimProperty = NULL;
 		m_sMeshProperty = m_sTextureProperty = "";
 	}
@@ -46,11 +47,14 @@ private:
 	{
 		sTextureProperty = m_sTextureProperty;
 		sMeshProperty = m_sMeshProperty;
+		pAnimTrackProp = m_pAnimProperty;
+
 	}
 	void restoreProperties( const string& sTextureProperty, const string& sMeshProperty, Anim_Track* pAnim )
 	{
 		m_sTextureProperty = (sTextureProperty == "") ? m_sTextureProperty : sTextureProperty;
 		m_sMeshProperty = (sMeshProperty == "") ? m_sMeshProperty : sMeshProperty;
+		m_pAnimProperty = (NULL == pAnim) ? m_pAnimProperty : pAnim;
 	}
 	string trimString( const string& sStr );
 };
