@@ -29,7 +29,7 @@ void Light::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThresho
 {
 	ShaderManager* pShdrMngr = ShaderManager::getInstance();
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 	{
 		m_pTexture->bindTexture( ShaderManager::eShaderType::LIGHT_SHDR, "gSampler" );
 	}
@@ -41,7 +41,7 @@ void Light::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThresho
 	glDrawArrays(GL_POINTS, 0, 1);
 	glPointSize( 1.f );
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 	{
 		m_pTexture->unbindTexture();
 	}

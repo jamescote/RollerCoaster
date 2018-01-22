@@ -23,10 +23,10 @@ MeshObject::~MeshObject()
 {
 	glDeleteVertexArrays( 1, &m_iVertexArray );
 
-	if ( NULL != m_pEdgeBuffer )
+	if ( nullptr != m_pEdgeBuffer )
 		delete m_pEdgeBuffer;
 
-	if ( NULL != m_pAnimTrack )
+	if ( nullptr != m_pAnimTrack )
 		delete m_pAnimTrack;
 
 	MeshManager::getInstance()->unloadMesh( m_pMesh->getFileName(), m_lID );
@@ -38,13 +38,13 @@ void MeshObject::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxTh
 	ShaderManager* pShdrMngr = ShaderManager::getInstance();
 	mat4 pPositionTranslated = mat4( m_fScale );
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 		m_pTexture->bindTexture( ShaderManager::eShaderType::MESH_SHDR, "mySampler" );
 
 	pShdrMngr->setUniformFloat( ShaderManager::eShaderType::MESH_SHDR, "fScale", m_fScale );
 
 	// Draw the Animation Track
-	if ( NULL != m_pAnimTrack )
+	if ( nullptr != m_pAnimTrack )
 	{
 		m_pAnimTrack->animate();
 		pPositionTranslated = m_pAnimTrack->getFreNetFrames() * scale( vec3( m_fScale ) ) * toMat4( m_pQuaternion );
@@ -58,7 +58,7 @@ void MeshObject::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxTh
 	m_pMesh->drawMesh( );
 	//m_pEdgeBuffer->drawEdgeBuffer( m_fScale, m_pPosition, fMinThreshold, fMaxThreshold );
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 		m_pTexture->unbindTexture();
 
 	glUseProgram(0);

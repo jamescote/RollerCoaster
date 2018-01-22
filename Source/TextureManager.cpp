@@ -2,7 +2,7 @@
 #include "Object3D.h"
 #include "ImageReader.h"
 
-TextureManager* TextureManager::pInstance = NULL;
+TextureManager* TextureManager::pInstance = nullptr;
 
 TextureManager::TextureManager()
 {
@@ -11,7 +11,7 @@ TextureManager::TextureManager()
 
 TextureManager* TextureManager::getInstance()
 {
-	if ( NULL == pInstance )
+	if ( nullptr == pInstance )
 		pInstance = new TextureManager();
 
 	return pInstance;
@@ -35,7 +35,7 @@ TextureManager::~TextureManager()
 Texture* TextureManager::loadTexture(const string& sFileName, long lID)
 {
 	// Attempt to grab it from the texture cache if it already exists
-	Texture* pReturnTexture = NULL;
+	Texture* pReturnTexture = nullptr;
 	TextureContainer* pContainer;
 	
 	if (m_pTextureCache.end() != m_pTextureCache.find(sFileName))

@@ -53,12 +53,12 @@ void Triangle::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThre
 
 	glUseProgram( ShaderManager::getInstance()->getProgram( ShaderManager::eShaderType::PLANE_SHDR ) );
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 		m_pTexture->bindTexture( ShaderManager::eShaderType::PLANE_SHDR, "gSampler" );
 
 	glDrawArrays( GL_TRIANGLES, 0, 1 );
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 		m_pTexture->unbindTexture();
 
 	glUseProgram(0);

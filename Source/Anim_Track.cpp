@@ -73,14 +73,14 @@ void Anim_Track::initializeTrack()
 	{
 		m_pMesh = MeshManager::getInstance()->loadMesh( m_sMeshFile, m_lID );
 
-		if ( NULL != m_pMesh )
+		if ( nullptr != m_pMesh )
 			m_pMesh->initMesh();
 	}
-	else m_pMesh = NULL;
+	else m_pMesh = nullptr;
 
 	if ( !m_sTextureFile.empty() )
 		m_pTexture = TextureManager::getInstance()->loadTexture( m_sTextureFile, m_lID );
-	else m_pTexture = NULL;
+	else m_pTexture = nullptr;
 
 	// Generate Vertex buffer for curve.
 	m_iVertexBuffer = ShaderManager::getInstance()->genVertexBuffer( m_iVertexArray, 0, 3, m_vKeyFrames.data(), m_vKeyFrames.size() * sizeof( vec3 ), GL_STATIC_DRAW );
@@ -89,10 +89,10 @@ void Anim_Track::initializeTrack()
 // Destructor
 Anim_Track::~Anim_Track()
 {
-	if ( NULL != m_pMesh )
+	if ( nullptr != m_pMesh )
 		MeshManager::getInstance()->unloadMesh( m_pMesh->getFileName(), m_lID );
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 		TextureManager::getInstance()->unloadTexture( m_pTexture->getFileName(), m_lID );
 
 	glDeleteBuffers( 1, &m_iVertexBuffer );

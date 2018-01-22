@@ -47,10 +47,10 @@ void Sphere::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThresh
 
 	glBindVertexArray( m_iVertexArray );
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 		m_pTexture->bindTexture( ShaderManager::eShaderType::MESH_SHDR, "mySampler" );
 
-	if ( NULL != m_pAnimTrack )
+	if ( nullptr != m_pAnimTrack )
 	{
 		m_pAnimTrack->animate();
 		m_pPosition = m_pAnimTrack->getPosition();
@@ -68,7 +68,7 @@ void Sphere::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThresh
 
 	//m_pEdgeBuffer->drawEdgeBuffer( m_fScale, m_pPosition, fMinThreshold, fMaxThreshold );
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 		m_pTexture->unbindTexture();
 
 	glUseProgram( 0 );

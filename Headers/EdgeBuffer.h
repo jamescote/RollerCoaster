@@ -37,7 +37,7 @@ private:
 		sEdge* pNext;							// Pointer to Next in Row.
 
 		// Default Constructor, requires the Vertex.
-		sEdge( unsigned int iVert, unsigned int iTri1 = 0, unsigned int iTri2 = 0, byte bEdge = 0, sEdge* next = NULL )
+		sEdge( unsigned int iVert, unsigned int iTri1 = 0, unsigned int iTri2 = 0, byte bEdge = 0, sEdge* next = nullptr )
 		{
 			iVertex = iVert;
 			iTriangle1 = iTri1;
@@ -52,7 +52,7 @@ private:
 		// Destructor: Kill connected Nodes -> Only need to kill first one to kill row.
 		~sEdge()
 		{
-			if( NULL != pNext )
+			if( nullptr != pNext )
 				delete pNext;
 		}
 

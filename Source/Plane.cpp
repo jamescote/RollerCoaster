@@ -41,16 +41,16 @@ Plane::Plane( const vec3* pPosition,
 		m_pEdgeBuffer->GenerateAdjListStrip( m_pVertices, m_pNormals, m_pVertices.size() );
 	}
 	else
-		m_pEdgeBuffer = NULL;
+		m_pEdgeBuffer = nullptr;
 
-	if ( NULL == m_pTexture )
+	if ( nullptr == m_pTexture )
 		ShaderManager::getInstance()->setUniformBool( ShaderManager::eShaderType::PLANE_SHDR, "bTextureLoaded", false );
 }
 
 // Destructor
 Plane::~Plane()
 {
-	if ( NULL != m_pEdgeBuffer )
+	if ( nullptr != m_pEdgeBuffer )
 		delete m_pEdgeBuffer;
 }
 
@@ -71,7 +71,7 @@ void Plane::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThresho
 {
 	glBindVertexArray( m_iVertexArray );
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 	{
 		m_pTexture->bindTexture( ShaderManager::eShaderType::PLANE_SHDR, "gSampler" );
 	}
@@ -81,13 +81,13 @@ void Plane::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThresho
 	glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
 
 	// Render EdgeBuffer
-	if ( NULL != m_pEdgeBuffer ) 
+	if ( nullptr != m_pEdgeBuffer ) 
 	{
 		m_pEdgeBuffer->CalculateEdgeBufferStrip( m_pNormals, &vCamLookAt );
 		m_pEdgeBuffer->drawEdgeBuffer( m_fScale, m_pPosition, fMinThreshold, fMaxThreshold );
 	}
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 		m_pTexture->unbindTexture();
 
 	glUseProgram(0);

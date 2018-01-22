@@ -13,7 +13,7 @@ Mesh::~Mesh()
 	glDeleteBuffers( 1, &m_iVertexBuffer );
 	glDeleteVertexArrays( 1, &m_iVertexArray );
 
-	if (NULL != m_pMesh)
+	if (nullptr != m_pMesh)
 		delete m_pMesh;
 }
 
@@ -22,7 +22,7 @@ Mesh::~Mesh()
 bool Mesh::genMesh( const string& sFileName )
 {
 	m_pMesh = trimesh::TriMesh::read(sFileName);
-	bool bReturnValue = (NULL != m_pMesh);
+	bool bReturnValue = (nullptr != m_pMesh);
 
 	if ( bReturnValue )
 	{

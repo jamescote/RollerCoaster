@@ -88,10 +88,10 @@ int main()
 		}
 
 		// Clean up!
-		if (m_GpxMngr != NULL)
+		if (m_GpxMngr != nullptr)
 			delete m_GpxMngr;
 
-		if( m_MseHndlr != NULL )
+		if( m_MseHndlr != nullptr )
 		  delete m_MseHndlr;
 
 		glfwDestroyWindow(m_Window);
@@ -123,7 +123,7 @@ bool initializeWindow(GLFWwindow** rWindow, int iHeight, int iWidth, const char*
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	(*rWindow) = glfwCreateWindow(iWidth, iHeight, cTitle, 0, 0);
+	(*rWindow) = glfwCreateWindow(iWidth, iHeight, cTitle, nullptr, nullptr);
 
 	if (!*rWindow)
 	{

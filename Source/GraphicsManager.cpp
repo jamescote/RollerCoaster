@@ -13,7 +13,7 @@ const vector<vec3> AXIS_VERTS = { WORLD_CENTER, WORLD_COORDS[ 0 ],
 								  WORLD_CENTER, WORLD_COORDS[ 2 ] };
 
 // Singleton Variable initialization
-GraphicsManager* GraphicsManager::m_pInstance = NULL;
+GraphicsManager* GraphicsManager::m_pInstance = nullptr;
 
 // Constructor - Private, only accessable within the Graphics Manager
 GraphicsManager::GraphicsManager(GLFWwindow* rWindow)
@@ -38,7 +38,7 @@ GraphicsManager::GraphicsManager(GLFWwindow* rWindow)
 // Requires Window to initialize 
 GraphicsManager* GraphicsManager::getInstance(GLFWwindow *rWindow)
 {
-	if (NULL == m_pInstance)
+	if (nullptr == m_pInstance)
 		m_pInstance = new GraphicsManager(rWindow);
 
 	return m_pInstance;
@@ -48,17 +48,17 @@ GraphicsManager* GraphicsManager::getInstance(GLFWwindow *rWindow)
 GraphicsManager::~GraphicsManager()
 {
 	// Destruct Camera
-	if ( NULL != m_pCamera )
+	if ( nullptr != m_pCamera )
 		delete m_pCamera;
 
 	// Let go of Window Handle
-	m_pWindow = NULL;
+	m_pWindow = nullptr;
 
 	// Let go of Manager Handles
-	if ( NULL != m_pEnvMngr )
+	if ( nullptr != m_pEnvMngr )
 		delete m_pEnvMngr;
 
-	if ( NULL != m_pShaderMngr )
+	if ( nullptr != m_pShaderMngr )
 		delete m_pShaderMngr;
 
 	glDeleteBuffers( 1, &m_pVertexBuffer );

@@ -9,11 +9,11 @@ Object::Object( const vec3* pPos, long lID, const string* sTexName, const Anim_T
 
 	if( !sTexName->empty() )
 		m_pTexture = TextureManager::getInstance()->loadTexture( *sTexName, lID );
-	else m_pTexture = NULL;
+	else m_pTexture = nullptr;
 
-	if ( NULL != pAnimTrack )
+	if ( nullptr != pAnimTrack )
 		m_pAnimTrack = new Anim_Track( *pAnimTrack );
-	else m_pAnimTrack = NULL;
+	else m_pAnimTrack = nullptr;
 }
 
 // Copy Constructor
@@ -22,9 +22,9 @@ Object::Object( const Object* pCopy )
 	m_pPosition = pCopy->m_pPosition;
 	m_lID = pCopy->m_lID;
 
-	if ( NULL != m_pTexture )
+	if ( nullptr != m_pTexture )
 		TextureManager::getInstance()->unloadTexture( m_pTexture->getFileName(), m_lID );
-	else m_pTexture = NULL;
+	else m_pTexture = nullptr;
 
 	m_pAnimTrack = pCopy->m_pAnimTrack;
 }
@@ -32,10 +32,10 @@ Object::Object( const Object* pCopy )
 // Destructor: unload Texture.
 Object::~Object()
 {
-	if( NULL != m_pTexture )
+	if( nullptr != m_pTexture )
 		TextureManager::getInstance()->unloadTexture( m_pTexture->getFileName(), m_lID );
 
-	if ( NULL != m_pAnimTrack )
+	if ( nullptr != m_pAnimTrack )
 		delete m_pAnimTrack;
 }
 
@@ -47,7 +47,7 @@ void Object::switchTexture( const string* sTexLoc )
 	TextureManager* pTxMngr = TextureManager::getInstance();
 	Texture* pNewTexture = pTxMngr->loadTexture( *sTexLoc, m_lID );
 
-	if ( NULL != pNewTexture )
+	if ( nullptr != pNewTexture )
 	{
 		pTxMngr->unloadTexture( m_pTexture->getFileName(), m_lID );
 		m_pTexture = pNewTexture;

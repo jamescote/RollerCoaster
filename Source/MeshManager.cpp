@@ -1,6 +1,6 @@
 #include "MeshManager.h"
 
-MeshManager* MeshManager::pInstance = NULL;
+MeshManager* MeshManager::pInstance = nullptr;
 
 MeshManager::MeshManager()
 {
@@ -9,7 +9,7 @@ MeshManager::MeshManager()
 
 MeshManager* MeshManager::getInstance()
 {
-	if ( NULL == pInstance )
+	if ( nullptr == pInstance )
 		pInstance = new MeshManager();
 
 	return pInstance;
@@ -33,7 +33,7 @@ MeshManager::~MeshManager()
 Mesh* MeshManager::loadMesh( const string& sFileName, long lID )
 {
 	// Attempt to grab it from the texture cache if it already exists
-	Mesh* pReturnMesh = NULL;
+	Mesh* pReturnMesh = nullptr;
 	MeshContainer* pContainer;
 
 	if ( m_pMeshCache.end() != m_pMeshCache.find( sFileName ) )
@@ -76,12 +76,12 @@ Mesh* MeshManager::loadMesh( const string& sFileName, long lID )
 }
 
 // Attempts to Initialize and return a new mesh object from a given object file.
-// Returns: Mesh Object created or NULL if mesh failed to create.
+// Returns: Mesh Object created or nullptr if mesh failed to create.
 //			Bool: Returns true on Success, False on failure.
 bool MeshManager::initializeMesh( Mesh* pReturnMesh, const string& sFileName )
 {
 	// Return Value
-	bool bReturnValue = ( NULL != pReturnMesh );
+	bool bReturnValue = ( nullptr != pReturnMesh );
 
 	if ( bReturnValue )
 		bReturnValue = pReturnMesh->genMesh( sFileName );

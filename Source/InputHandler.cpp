@@ -68,7 +68,7 @@ int InputHandler::get_Next_Word(char* c_ReturnWord, int iReturnSize)
 			m_iCurrIndex++;
 		}
 
-		// Set null terminator
+		// Set nullptr terminator
 		c_ReturnWord[iIndex] = '\0';
 
 		// Return the number of Characters Copied.

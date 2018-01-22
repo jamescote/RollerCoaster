@@ -5,7 +5,7 @@
 /////////////
 
 // Singleton Variable initialization
-ShaderManager* ShaderManager::m_pInstance = NULL;
+ShaderManager* ShaderManager::m_pInstance = nullptr;
 
 // Public - Not a singleton
 // Designed mainly to manage different shaders between assignments.  
@@ -57,10 +57,10 @@ ShaderManager::ShaderManager()
 	m_pShader[ eShaderType::RC_TRACK_SHDR ].storeShadrLoc( Shader::eShader::FRAGMENT, "Shaders/rc_track.frag" );
 }
 
-// Get the Singleton ShaderManager Object.  Initialize it if NULL.
+// Get the Singleton ShaderManager Object.  Initialize it if nullptr.
 ShaderManager* ShaderManager::getInstance()
 {
-	if (NULL == m_pInstance)
+	if (nullptr == m_pInstance)
 		m_pInstance = new ShaderManager();
 
 	return m_pInstance;
@@ -117,7 +117,7 @@ GLuint ShaderManager::genVertexBuffer( GLuint iVertArray,
 	glGenBuffers( 1, &iVertexBufferLoc );
 	glBindBuffer( GL_ARRAY_BUFFER, iVertexBufferLoc );
 	glBufferData( GL_ARRAY_BUFFER, pSize, pData, usage );
-	glVertexAttribPointer( iSpecifiedIndex, iChunkSize, GL_FLOAT, GL_FALSE, 0, NULL );
+	glVertexAttribPointer( iSpecifiedIndex, iChunkSize, GL_FLOAT, GL_FALSE, 0, nullptr );
 	glEnableVertexAttribArray( iSpecifiedIndex );
 
 	glBindVertexArray( 0 );

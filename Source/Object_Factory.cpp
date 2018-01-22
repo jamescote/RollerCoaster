@@ -21,21 +21,21 @@
 #define COMMENT_CHAR '#'
 
 // Singleton Declaration
-Object_Factory* Object_Factory::m_pInstance = NULL;
+Object_Factory* Object_Factory::m_pInstance = nullptr;
 
 // Private Constructor
 Object_Factory::Object_Factory()
 {
 	m_lNextID = 0;
 
-	m_pAnimProperty = NULL;
+	m_pAnimProperty = nullptr;
 	m_sMeshProperty = m_sTextureProperty = "";
 }
 
 // Returns the singleton instance of the Object Factory
 Object_Factory* Object_Factory::getInstance()
 {
-	if ( NULL == m_pInstance )
+	if ( nullptr == m_pInstance )
 		m_pInstance = new Object_Factory();
 
 	return m_pInstance;
@@ -44,7 +44,7 @@ Object_Factory* Object_Factory::getInstance()
 
 Object_Factory::~Object_Factory()
 {
-	if ( NULL != m_pAnimProperty )
+	if ( nullptr != m_pAnimProperty )
 		delete m_pAnimProperty;
 }
 
@@ -52,7 +52,7 @@ Object_Factory::~Object_Factory()
 // Create a Sphere given a starting position, color and radius
 Object3D* Object_Factory::createSphere( vector< string > sData, int iLength )
 {
-	Sphere* pReturnSphere = NULL;
+	Sphere* pReturnSphere = nullptr;
 	vec3 vPosition;
 
 	// Create the Sphere if we're given the correct # of values
@@ -75,7 +75,7 @@ Object3D* Object_Factory::createPlane( vector< string > sData, int iLength )
 {
 	vec3 pPosition;
 	vector<glm::vec3> vCorners;
-	Plane* pReturnPlane = NULL;
+	Plane* pReturnPlane = nullptr;
 	bool bUseEB;
 
 	if ( iLength == MAX_PLANE_PARAMS )
@@ -102,7 +102,7 @@ Object3D* Object_Factory::createTriangle( vector< string > sData, int iLength )
 {
 	vec3 pPosition;
 	vector<glm::vec3> vCorners;
-	Triangle* pReturnTri = NULL;
+	Triangle* pReturnTri = nullptr;
 
 	if ( MAX_TRI_PARAMS == iLength )
 	{
@@ -128,7 +128,7 @@ Object3D* Object_Factory::createTriangle( vector< string > sData, int iLength )
 Light* Object_Factory::createLight( vector< string > sData, int iLength )
 {
 	vec3 pPosition, pColor;
-	Light* pReturnLight = NULL;
+	Light* pReturnLight = nullptr;
 
 	if ( MAX_LIGHT_PARAMS == iLength )
 	{
@@ -151,7 +151,7 @@ Light* Object_Factory::createLight( vector< string > sData, int iLength )
 Object3D* Object_Factory::createMesh( vector< string > sData, int iLength )
 {
 	vec3 pPosition;
-	MeshObject* pReturnMesh = NULL;
+	MeshObject* pReturnMesh = nullptr;
 
 	if ( MAX_MESH_PARAMS == iLength )
 	{
@@ -172,13 +172,13 @@ Object3D* Object_Factory::createMesh( const vec3* pPos,
 									  const string* sLocation,
 									  const string* sTexLocation )
 {
-	MeshObject* pNewMesh = NULL;
+	MeshObject* pNewMesh = nullptr;
 	if ( sLocation->find( ".ply" ) != string::npos )
 		pNewMesh = new MeshObject( pPos,
 								   sLocation,
 								   getNewID(),
 								   sTexLocation,
-								   NULL );
+								   nullptr );
 
 	return pNewMesh;
 }
@@ -194,7 +194,7 @@ void Object_Factory::loadFromFile( string sFileName )
 	vector< string > sData;
 	vector< string > sAdditionalData;
 	string sIndicator, sParser;
-	Object* pResultingObject = NULL;
+	Object* pResultingObject = nullptr;
 
 	// Open File
 	inFile.open( sFileName );
@@ -260,7 +260,7 @@ void Object_Factory::pullData( ifstream& inFile, vector< string >& sReturnData )
 {
 	string sBuffer, sParser;
 	string sTexturePropPH, sMeshPropPH;
-	Anim_Track* pAnimTrackPropPH = NULL;
+	Anim_Track* pAnimTrackPropPH = nullptr;
 	vector< string > sPropertyData;
 	string sPropertyIndicator;
 	stringstream sStream( sBuffer );
@@ -298,7 +298,7 @@ void Object_Factory::pullData( ifstream& inFile, vector< string >& sReturnData )
 
 void Object_Factory::handleData( vector< string >& sData, const string& sIndicator )
 {
-	Object* pResultingObject = NULL;
+	Object* pResultingObject = nullptr;
 
 	if ( "sphere" == sIndicator )			// Parse Sphere
 		pResultingObject = createSphere( sData, sData.size() );
@@ -313,10 +313,10 @@ void Object_Factory::handleData( vector< string >& sData, const string& sIndicat
 
 	clearProperties();
 
-	if ( NULL == pResultingObject )
+	if ( nullptr == pResultingObject )
 		outputError( &sIndicator, sData );
 
-	pResultingObject = NULL; // Don't do anything with the Object
+	pResultingObject = nullptr; // Don't do anything with the Object
 							 // Handled by the Environment Manager
 }
 

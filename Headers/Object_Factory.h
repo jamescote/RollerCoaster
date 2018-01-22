@@ -37,10 +37,10 @@ private:
 	void handleProperty( vector< string >& sData, const string& sIndicator );
 	void clearProperties( ) // Clear any properties
 	{ 
-		if ( NULL != m_pAnimProperty )
+		if ( nullptr != m_pAnimProperty )
 			delete m_pAnimProperty;
 
-		m_pAnimProperty = NULL;
+		m_pAnimProperty = nullptr;
 		m_sMeshProperty = m_sTextureProperty = "";
 	}
 	void saveProperties( string& sTextureProperty, string& sMeshProperty, Anim_Track* pAnimTrackProp )
@@ -54,7 +54,7 @@ private:
 	{
 		m_sTextureProperty = (sTextureProperty == "") ? m_sTextureProperty : sTextureProperty;
 		m_sMeshProperty = (sMeshProperty == "") ? m_sMeshProperty : sMeshProperty;
-		m_pAnimProperty = (NULL == pAnim) ? m_pAnimProperty : pAnim;
+		m_pAnimProperty = (nullptr == pAnim) ? m_pAnimProperty : pAnim;
 	}
 	string trimString( const string& sStr );
 };

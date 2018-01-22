@@ -5,7 +5,7 @@
 #define MAX_REFLECTIONS	800
 
 // Initialize Static Instance Variable
-EnvironmentManager* EnvironmentManager::m_pInstance = NULL;
+EnvironmentManager* EnvironmentManager::m_pInstance = nullptr;
 
 EnvironmentManager::EnvironmentManager()
 {
@@ -17,7 +17,7 @@ EnvironmentManager::EnvironmentManager()
 // Gets the instance of the environment manager.
 EnvironmentManager* EnvironmentManager::getInstance()
 {
-	if ( NULL == m_pInstance )
+	if ( nullptr == m_pInstance )
 		m_pInstance = new EnvironmentManager();
 	return m_pInstance;
 }
@@ -55,7 +55,7 @@ void EnvironmentManager::killObject( long lID )
 	unsigned int i = 0;
 
 	// Iterate to find Object
-	while ( i < m_pObjects.size() && NULL != m_pObjects[i] && lID != m_pObjects[i]->ID() )
+	while ( i < m_pObjects.size() && nullptr != m_pObjects[i] && lID != m_pObjects[i]->ID() )
 		++i;
 
 	// Delete Object and remove it from list.
@@ -73,7 +73,7 @@ void EnvironmentManager::killLight( long lID )
 	unsigned int i = 0;
 
 	// Iterate to find Object
-	while ( i < m_pLights.size() && NULL != m_pLights[i] && lID != m_pLights[i]->ID() )
+	while ( i < m_pLights.size() && nullptr != m_pLights[i] && lID != m_pLights[i]->ID() )
 		++i;
 
 	// Delete Object and remove it from list.
@@ -110,7 +110,7 @@ void EnvironmentManager::purgeEnvironment()
 		  pIter != m_pObjects.end();
 		  ++pIter )
 	{
-		if ( NULL != (*pIter) )
+		if ( nullptr != (*pIter) )
 			delete (*pIter);
 	}
 
@@ -119,7 +119,7 @@ void EnvironmentManager::purgeEnvironment()
 		  pIter != m_pLights.end();
 		  ++pIter )
 	{
-		if ( NULL != (*pIter) )
+		if ( nullptr != (*pIter) )
 			delete (*pIter);
 	}
 
@@ -151,7 +151,7 @@ void EnvironmentManager::renderEnvironment( const vec3& vCamLookAt )
 			pIter != m_pObjects.end();
 			++pIter )
 		{
-			if ( NULL != (*pIter) )
+			if ( nullptr != (*pIter) )
 				(*pIter)->draw( vCamLookAt, m_fMinEdgeThreshold, m_fMaxEdgeThreshold );
 		}
 	}
@@ -166,7 +166,7 @@ void EnvironmentManager::switchTexture( const string* sTexLocation, long lObjID 
 {
 	Object* pObj = getObject( lObjID );
 
-	if ( NULL != pObj )
+	if ( nullptr != pObj )
 		pObj->switchTexture( sTexLocation );
 	else
 		cout << "Unable to find Object with ID " << lObjID << " to switch texture to \""
@@ -190,11 +190,11 @@ void EnvironmentManager::moveLight(vec3 pMoveVec)
 // can search in this manner and modify the object, preserving encapsulation.
 Object* EnvironmentManager::getObject( long lID )
 {
-	Object* pReturnObj = NULL;
+	Object* pReturnObj = nullptr;
 	unsigned int i = 0;
 
 	// Iterate to find Object
-	while ( i < m_pLights.size() && NULL != m_pLights[ i ] && lID != m_pLights[ i ]->ID() )
+	while ( i < m_pLights.size() && nullptr != m_pLights[ i ] && lID != m_pLights[ i ]->ID() )
 		++i;
 
 	// Return Light
@@ -204,7 +204,7 @@ Object* EnvironmentManager::getObject( long lID )
 	{
 		i = 0;
 		// Iterate to find Object
-		while ( i < m_pObjects.size() && NULL != m_pObjects[ i ] && lID != m_pObjects[ i ]->ID() )
+		while ( i < m_pObjects.size() && nullptr != m_pObjects[ i ] && lID != m_pObjects[ i ]->ID() )
 			++i;
 
 		// Return Object

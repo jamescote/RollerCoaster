@@ -33,7 +33,7 @@ const char CmdHandler::cCommands[NUM_CMDS][CMD_SIZE] = { "-help",
 														 "threshold_min",	
 														 "threshold_max"	};
 
-CmdHandler* CmdHandler::m_pInstance = NULL;
+CmdHandler* CmdHandler::m_pInstance = nullptr;
 
 CmdHandler::CmdHandler(GLFWwindow *rWindow) : InputHandler()
 {
@@ -48,7 +48,7 @@ CmdHandler::CmdHandler(GLFWwindow *rWindow) : InputHandler()
 //   Input associated with it.
 CmdHandler* CmdHandler::getInstance(GLFWwindow *rWindow)
 {
-	if (NULL == m_pInstance)
+	if (nullptr == m_pInstance)
 		m_pInstance = new CmdHandler(rWindow);
 
 	return m_pInstance;
@@ -57,7 +57,7 @@ CmdHandler* CmdHandler::getInstance(GLFWwindow *rWindow)
 // Get a copy of CmdHandler with an associated Input.
 CmdHandler* CmdHandler::getInstance(const char* c_Input, int iInputSize, GLFWwindow *rWindow)
 {
-	if (NULL == m_pInstance)
+	if (nullptr == m_pInstance)
 		m_pInstance = new CmdHandler(c_Input, iInputSize, rWindow);
 	else
 		m_pInstance->load_Input(c_Input, iInputSize);
@@ -69,8 +69,8 @@ CmdHandler* CmdHandler::getInstance(const char* c_Input, int iInputSize, GLFWwin
 CmdHandler::~CmdHandler()
 {
 	delete m_pInstance;
-	m_pGPXMngr = NULL;
-	m_pEnvMngr = NULL;
+	m_pGPXMngr = nullptr;
+	m_pEnvMngr = nullptr;
 }
 
 // Process initial input, acts as though key word is first word of input.
@@ -465,7 +465,7 @@ bool CmdHandler::exec_Load()
 			{
 				sModLoc = string( c_ModelLocation );
 				sTexLoc = string( c_TexLocation );
-				if ( NULL == Object_Factory::getInstance()->createMesh( &pPos, &sModLoc, &sTexLoc ) )
+				if ( nullptr == Object_Factory::getInstance()->createMesh( &pPos, &sModLoc, &sTexLoc ) )
 					cout << "Error, unable to load " << sModLoc << " as a model.\n";
 			}
 			else  // Errors reading model and texture locatiosn

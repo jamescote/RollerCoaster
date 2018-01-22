@@ -37,7 +37,7 @@ void EdgeBuffer::GenerateAdjListMesh( const vector<unsigned int>& m_pIndices,
 {
 	// Clear any data we had previously and resize for the new adjacency list.
 	m_pAdjacencyList.clear();
-	m_pAdjacencyList.resize( iNumVerts, NULL );
+	m_pAdjacencyList.resize( iNumVerts, nullptr );
 
 	vec3 Normal1, Normal2, Normal3, pAvgNormal;
 
@@ -67,7 +67,7 @@ void EdgeBuffer::GenerateAdjListStrip( const vector<vec3>& pVerts,
 {
 	// Clear any data we had previously and resize for the new adjacency list.
 	m_pAdjacencyList.clear();
-	m_pAdjacencyList.resize( iNumVerts, NULL );
+	m_pAdjacencyList.resize( iNumVerts, nullptr );
 	vec3 pAvgNormal;
 
 	int iTriNum = 1;
@@ -232,7 +232,7 @@ void EdgeBuffer::drawEdges( ShaderManager::eShaderType eType )
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_iIndicesBuffer );
 	glBufferData( GL_ELEMENT_ARRAY_BUFFER, m_vDrawIndices.size() * sizeof( uvec2 ), m_vDrawIndices.data(), GL_DYNAMIC_DRAW );
 
-	glDrawElements( GL_LINES, m_vDrawIndices.size() * 2, GL_UNSIGNED_INT, NULL );
+	glDrawElements( GL_LINES, m_vDrawIndices.size() * 2, GL_UNSIGNED_INT, nullptr );
 }
 
 // Set Uniforms to all edge shaders: Scale, Position and Edge Width.
@@ -265,7 +265,7 @@ void EdgeBuffer::findIndices( byte bFilter, float fMinThreshold, float fMaxThres
 		 ++i )
 	{
 		sEdge* pEdgeIter = m_pAdjacencyList[i];
-		while ( pEdgeIter != NULL )
+		while ( pEdgeIter != nullptr )
 		{
 			// Is this one a desired edge?
 			if ( bFilter == pEdgeIter->bEdgeType )
@@ -288,7 +288,7 @@ void EdgeBuffer::findIndices( byte bFilter, float fMinThreshold, float fMaxThres
 void EdgeBuffer::printEB()
 {
 	// Iterator through the Row
-	sEdge* pIter = NULL;
+	sEdge* pIter = nullptr;
 	bool bShortView = true;
 	unsigned int uiShortRange = 10;
 	bShortView = uiShortRange < m_pAdjacencyList.size();
@@ -299,10 +299,10 @@ void EdgeBuffer::printEB()
 		cout << i << "->";
 		pIter = m_pAdjacencyList[ i ];
 		
-		while ( NULL != pIter )
+		while ( nullptr != pIter )
 		{
 			pIter->printEdge();
-			cout << (NULL != pIter->pNext ? ", " : ".");
+			cout << (nullptr != pIter->pNext ? ", " : ".");
 			pIter = pIter->pNext;
 		}
 
@@ -320,10 +320,10 @@ void EdgeBuffer::printEB()
 			cout << i << "->";
 			pIter = m_pAdjacencyList[ i ];
 
-			while ( NULL != pIter )
+			while ( nullptr != pIter )
 			{
 				pIter->printEdge();
-				cout << (NULL != pIter->pNext ? ", " : ".");
+				cout << (nullptr != pIter->pNext ? ", " : ".");
 				pIter = pIter->pNext;
 			}
 
@@ -346,7 +346,7 @@ void EdgeBuffer::addTriangle( unsigned int iVert1, unsigned int iVert2, unsigned
 //		and connecting edge is denoted by iVertex2
 void EdgeBuffer::insertEdge( unsigned int iVertex1, unsigned int iVertex2, int iTriangle, const vec3& pNormal )
 {
-	if ( NULL == m_pAdjacencyList[ iVertex1 ] )	// No Edges connected to this Vertex, create first edge
+	if ( nullptr == m_pAdjacencyList[ iVertex1 ] )	// No Edges connected to this Vertex, create first edge
 	{
 		m_pAdjacencyList[ iVertex1 ] = new sEdge( iVertex2, iTriangle );
 		m_pAdjacencyList[ iVertex1 ]->pNormal1 = vec3( pNormal );
@@ -357,7 +357,7 @@ void EdgeBuffer::insertEdge( unsigned int iVertex1, unsigned int iVertex2, int i
 		sEdge* pIter = m_pAdjacencyList[ iVertex1 ];
 
 		// Iterate through: result in either end of adjacency row or before insertion spot
-		while ( NULL != pIter->pNext && iVertex2 > pIter->pNext->iVertex )
+		while ( nullptr != pIter->pNext && iVertex2 > pIter->pNext->iVertex )
 			pIter = pIter->pNext;
 
 		// Equal Case: Set Second Triangle of Edge
@@ -382,7 +382,7 @@ void EdgeBuffer::insertEdge( unsigned int iVertex1, unsigned int iVertex2, int i
 void EdgeBuffer::reset()
 {
 	// Row Iterator
-	sEdge* pRowIter = NULL;
+	sEdge* pRowIter = nullptr;
 
 	// For loop through Adjacency List
 	for ( vector< sEdge* >::iterator pIter = m_pAdjacencyList.begin();
@@ -391,7 +391,7 @@ void EdgeBuffer::reset()
 	{
 		// Clear all the Edge Flags in the row.
 		pRowIter = (*pIter);
-		while ( NULL != pRowIter )
+		while ( nullptr != pRowIter )
 		{
 			pRowIter->bEdgeType = 0;
 			pRowIter = pRowIter->pNext;
@@ -417,10 +417,10 @@ void EdgeBuffer::updateEB( int iVertex1, int iVertex2, bool bFront, bool bBack )
 	unsigned int iEdgeBufferIndex = (iVertex1 + iVertex2) - 1;
 	uvec2 uvHashKey = uvec2( iVertex1, iVertex2 );
 
-	while ( NULL != pUpdatingEdge && iVertex2 != pUpdatingEdge->iVertex )
+	while ( nullptr != pUpdatingEdge && iVertex2 != pUpdatingEdge->iVertex )
 		pUpdatingEdge = pUpdatingEdge->pNext;
 
-	if ( NULL != pUpdatingEdge )
+	if ( nullptr != pUpdatingEdge )
 	{
 		if ( (pUpdatingEdge->bEdgeType & ARTIST_MASK) < Artist_Threshold )
 			pUpdatingEdge->bEdgeType += A_Bit;

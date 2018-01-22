@@ -3,7 +3,7 @@
 #define UPDATE_THRESHOLD .01f
 
 // Static Singleton instance
-Mouse_Handler* Mouse_Handler::m_pInstance = NULL;
+Mouse_Handler* Mouse_Handler::m_pInstance = nullptr;
 
 // Constructor
 Mouse_Handler::Mouse_Handler(GLFWwindow *rWindow)
@@ -15,7 +15,7 @@ Mouse_Handler::Mouse_Handler(GLFWwindow *rWindow)
 // Fetch the Singleton instance
 Mouse_Handler* Mouse_Handler::getInstance(GLFWwindow *rWindow)
 {
-	if (NULL == m_pInstance)
+	if (nullptr == m_pInstance)
 		m_pInstance = new Mouse_Handler(rWindow);
 
 	return m_pInstance;
@@ -24,7 +24,7 @@ Mouse_Handler* Mouse_Handler::getInstance(GLFWwindow *rWindow)
 // Destructor
 Mouse_Handler::~Mouse_Handler()
 {
-	m_pGpxMngr = NULL;
+	m_pGpxMngr = nullptr;
 }
 
 // Updates the mouse posisions internally and applies a transform if necessary

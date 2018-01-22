@@ -8,7 +8,7 @@ class Anim_Track
 {
 public:
 	Anim_Track( long lID, const string* sContourFile, 
-				const string* sMeshFile = NULL, const string* sTextureFile = NULL,  bool bOpen = false );
+				const string* sMeshFile = nullptr, const string* sTextureFile = nullptr,  bool bOpen = false );
 	Anim_Track( const Anim_Track& pRHS );
 	Anim_Track& operator=( const Anim_Track& pRHS );
 	~Anim_Track();
