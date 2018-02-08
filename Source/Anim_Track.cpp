@@ -21,7 +21,7 @@
 #define RIGHT_TRACK m_vTrackFrames[1]
 
 // Default Constructor
-Anim_Track::Anim_Track( long lID, const string* sContourFile, const string* pMeshLoc, 
+Anim_Track::Anim_Track( long lID, const string* sContourFile, const string* pMeshLoc,
 						const string* pTexLoc, bool bOpen )
 {
 	// Store generation values
@@ -30,7 +30,7 @@ Anim_Track::Anim_Track( long lID, const string* sContourFile, const string* pMes
 	m_sMeshFile = *pMeshLoc;
 	m_sTextureFile = *pTexLoc;
 	m_bOpenCurve = bOpen;
-	
+
 	initializeTrack();
 }
 
@@ -137,7 +137,7 @@ void Anim_Track::loadAnimTrack( const string& pContourFile )
 	{
 		++lineNum;
 
-		// remove comments	
+		// remove comments
 		index = line.find_first_of( "#" );
 		if ( index != string::npos )
 		{
@@ -167,7 +167,7 @@ void Anim_Track::loadAnimTrack( const string& pContourFile )
 		ss >> v.z;
 
 		// No issues, store the position
-		if ( ss.good() )
+		if ( !( ss.fail() || ss.bad() ) )
 			m_vKeyFrames.push_back( v );
 	}
 	file.close();
@@ -353,36 +353,20 @@ void Anim_Track::preProcessCurve( )
 
 	// Push on current point, evaluate from here
 	vNewCurve.push_back( vCurrPos );
-	
+
 	// Go through each point to set a set distance between each point.
 	while ( v_iNextPos != m_vKeyFrames.end() )
 	{
 		// Distance too small? evaluate next point and try again
 		if ( length( *v_iNextPos - vCurrPos ) < DELTA_ST )
 			v_iNextPos++;
-		else         
-		{
-			// If the distance is too long, truncate it to the set size and add new point to list
-			vNewCurve.push_back( vCurrPos + ((*v_iNextPos - vCurrPos) * DELTA_ST ) );
-			vCurrPos = vNewCurve.back();
-			
-			// Evaluate min and max height as curve is pieced through
-			evalHeight( vNewCurve.back().y, vNewCurve.size() * DELTA_ST );
-		}
-	}
-
-	// Evaluate edge case (between current end and the beginning)
-	v_iNextPos = vNewCurve.begin();
-
-	// Stop when the last segment is smaller than the delta.
-	while ( length( vNewCurve.front() - vNewCurve.back() ) >= DELTA_ST )
-	{
-		// Same algorithm
-		if ( length( *v_iNextPos - vNewCurve.back() ) < DELTA_ST )
-			v_iNextPos++;
 		else
 		{
-			vNewCurve.push_back( vNewCurve.back() + ((*v_iNextPos - vNewCurve.back()) * DELTA_ST) );
+			// If the distance is too long, truncate it to the set size and add new point to list
+			vNewCurve.push_back( vCurrPos + (normalize(*v_iNextPos - vCurrPos) * DELTA_ST ) );
+			vCurrPos = vNewCurve.back();
+
+			// Evaluate min and max height as curve is pieced through
 			evalHeight( vNewCurve.back().y, vNewCurve.size() * DELTA_ST );
 		}
 	}
@@ -407,8 +391,8 @@ void Anim_Track::generateTrackFrames()
 	// Track lengths will be the same so only one loop needed
 	while ( v_iNextPos != m_vKeyFrames.end() )
 	{
-		// get binormal and position then create the track points
-		vBiNormal = normalize( cross( getTangent( fCurrDist ), computeNormal( fCurrDist ) ) );
+		// get binormal and position then create the track pointsfIndexedDist
+		vBiNormal = normalize( cross( computeNormal( fCurrDist ), normalize( getTangent( fCurrDist ) ) ) );
 		vCurrPos = getPosition(fCurrDist);
 		LEFT_TRACK.push_back( vCurrPos + (vBiNormal * -fHalfWidth ) );
 		RIGHT_TRACK.push_back( vCurrPos + (vBiNormal * fHalfWidth ) );
@@ -419,10 +403,10 @@ void Anim_Track::generateTrackFrames()
 	}
 
 	// Last Point
-	vBiNormal = normalize( cross( getTangent( fCurrDist ), computeNormal( fCurrDist ) ) );
-	vCurrPos = getPosition( fCurrDist );
-	LEFT_TRACK.push_back( vCurrPos + (vBiNormal * -fHalfWidth) );
-	RIGHT_TRACK.push_back( vCurrPos + (vBiNormal * fHalfWidth) );
+	//vBiNormal = normalize( cross( normalize( getTangent( fCurrDist ) ), normalize( computeNormal( fCurrDist ) ) ) );
+	//vCurrPos = getPosition( fCurrDist );
+	//LEFT_TRACK.push_back( vCurrPos + (vBiNormal * -fHalfWidth) );
+	//RIGHT_TRACK.push_back( vCurrPos + (vBiNormal * fHalfWidth) );
 }
 
 // Returns an Arc-Length distance at a certain point along the curve.
@@ -434,11 +418,12 @@ vec3 Anim_Track::getPosition( float sDist )
 	// Evaluate the index from the current distance on the track
 	sDist = wrap( sDist );
 	float fIndexedDist = (float)sDist / (float)DELTA_ST;
-	int iIndex = (unsigned int) (fIndexedDist >= m_vKeyFrames.size() ? 0 : fIndexedDist);
-	int iNextIndex = (unsigned int) (iIndex + 1) < m_vKeyFrames.size() ? (iIndex + 1) : 0;
+	float fNextIndexedDist = wrap( sDist + DELTA_ST ) / (float) DELTA_ST;
+	int iIndex = (unsigned int) fIndexedDist;//(fIndexedDist >= m_vKeyFrames.size() ? fIndexedDist - m_vKeyFrames.size() : fIndexedDist);
+	int iNextIndex = (unsigned int) fNextIndexedDist;//(iIndex + 1) < m_vKeyFrames.size() ? (iIndex + 1) : 0;
 
 	// Get interpolated distance
-	fReturnDist = m_vKeyFrames[ iIndex ] + 
+	fReturnDist = m_vKeyFrames[ iIndex ] +
 		((m_vKeyFrames[ iNextIndex ] - m_vKeyFrames[ iIndex ]) * (fIndexedDist - (float)iIndex));
 
 	return fReturnDist;
@@ -475,7 +460,7 @@ float Anim_Track::getVelocity( float fDist )
 			fReturnVelocity = sqrt( (2.0f * GRAVITY) * (m_fMaxHeight - m_fCurrHeight) );
 			break;
 		case DECELERATION:	// Deceleration Stage -> coming to a stop.
-			fDecel_Start_Velocity = 
+			fDecel_Start_Velocity =
 				sqrt( (2.0f * GRAVITY) * (m_fMaxHeight - getPosition( DECEL_THRESHOLD( m_fCurveLength ) ).y ) );
 			fDecelDistance = m_fCurveLength - DECEL_THRESHOLD( m_fCurveLength );
 			fReturnVelocity = fDecel_Start_Velocity * ((m_fCurveLength - m_fCurrDist) / fDecelDistance);
@@ -485,15 +470,15 @@ float Anim_Track::getVelocity( float fDist )
 	// Truncate the Velocity to a Minimum.
 	fReturnVelocity = fReturnVelocity < MIN_VELOCITY ? MIN_VELOCITY : fReturnVelocity;
 
-	return fReturnVelocity;
+	return fReturnVelocity * 0.5;
 }
 
 // Computes FreNet Frames for the Containing Object to position its model with
 void Anim_Track::computeFreNetFrames()
 {
-	vec3 vTangent = getTangent( m_fCurrDist );
-	vec3 vBiNormal = computeBiNormal( vTangent );
-	vec3 vNormal = normalize( cross( vBiNormal, vTangent ) );
+	vec3 vTangent = normalize( getTangent( m_fCurrDist ) );
+	vec3 vBiNormal = normalize( computeBiNormal( vTangent ) );
+	vec3 vNormal = normalize( cross( vTangent, vBiNormal  ) );
 
 	// mat4 is column wise
 	m_m4CurrentFrenetFrame[ 0 ] = vec4( vBiNormal, 0.0f );		// Column 1: Binormal
@@ -508,16 +493,20 @@ vec3 Anim_Track::getCentripetalAcce( float fDist )
 {
 	// Calculate the Centripetal Acceleration as: **THIS WASN'T WORKING**
 	//		(1 / (x^2 + c^2)) * (p'[i+1] - 2p[i] + p'[i-1])
-	vec3 vReturnValue;/* = (getPosition( fDist + DELTA_S ) - 2.0f * getPosition( fDist ) + getPosition( fDist - DELTA_S )) / (DELTA_S * DELTA_S);
+	vec3 vReturnValue;
+	/*vec3 vReturnValue = (getPosition( fDist + DELTA_S ) - 2.0f * getPosition( fDist ) + getPosition( fDist - DELTA_S )) / (DELTA_S * DELTA_S);
 	float fX = length( vReturnValue ) * 0.5f;												// 1/2 * (p'[i+1] - 2p[i] + p'[i-1])
 	float fC = length( getPosition( fDist + DELTA_S ) - getPosition( fDist - DELTA_S ) )	// 1/2 * (p'[i+1] - p'[i-1])
 		* 0.5f;
-	vReturnValue *= 2.0f*fX / ((fX*fX) + (fC*fC));*/
+	vReturnValue *= 2.0f*fX / ((fX*fX) + (fC*fC));/*/
+	float fCurrVelocity = getVelocity( fDist );
 
-	vReturnValue = getVelocity( fDist ) * getVelocity( fDist ) *
+	/*vReturnValue = fCurrVelocity * fCurrVelocity *
 		(getPosition( fDist + DELTA_S ) - 2.0f * getPosition( fDist ) + getPosition( fDist - DELTA_S )) / (DELTA_S * DELTA_S) +
-		vec3( 0.0f, -GRAVITY, 0.0f ) + ((getVelocity( fDist + getVelocity( fDist ) * DELTA_T ) - getVelocity( fDist )) / DELTA_T) *
-		getTangent( fDist );  /* Recreation of Code from handout -> This Works, Previous one did not */
+		vec3( 0.0f, GRAVITY, 0.0f ) + ((getVelocity( fDist + fCurrVelocity * DELTA_T ) - fCurrVelocity) / DELTA_T) *
+		getTangent( fDist );   Recreation of Code from handout -> This Works, Previous one did not */
+
+	vReturnValue = (getTangent( fDist + (getVelocity( fDist ) * DELTA_T) ) - getTangent( fDist )) / DELTA_T;
 
 	return vReturnValue;
 }
@@ -525,17 +514,17 @@ vec3 Anim_Track::getCentripetalAcce( float fDist )
 // Computes the BiNormal given a Tangent
 vec3 Anim_Track::computeBiNormal( const vec3& vTangent )
 {
-	return normalize( cross( vTangent, computeNormal() ) );
+	return cross( computeNormal(), vTangent );
 }
 
 // Computes the Normal at a given point on the track.
 vec3 Anim_Track::computeNormal( float fDist )
 {
-	return normalize( getCentripetalAcce( fDist ) - vec3( 0.0f, -GRAVITY, 0.0f ) );
+	return getCentripetalAcce( fDist ) + vec3( 0.0f, GRAVITY, 0.0f );
 }
 
 // Return estimated tangent at point fDist.
 vec3 Anim_Track::getTangent( float fDist )
 {
-	return normalize( (getPosition( fDist + DELTA_S ) - getPosition( fDist )) / DELTA_S );
+	return  (getPosition( fDist + (getVelocity(fDist) * DELTA_T) ) - getPosition( fDist )) / DELTA_T;
 }

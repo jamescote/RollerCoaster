@@ -96,13 +96,13 @@ mesh_obj {
 		textures-256-256/fig-10d.png
 	}
 	+anim_track {
-		noname.con
+	   noname.con
 	}
 }
 
 #sphere {
 #	0 .1 0 .025
 #	+anim_track {
-#		noname.con
+#		savedCurve.txt
 #	}
 #}

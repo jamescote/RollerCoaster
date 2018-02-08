@@ -58,6 +58,7 @@ void MeshObject::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxTh
 	m_pMesh->drawMesh( );
 	//m_pEdgeBuffer->drawEdgeBuffer( m_fScale, m_pPosition, fMinThreshold, fMaxThreshold );
 
+
 	if ( nullptr != m_pTexture )
 		m_pTexture->unbindTexture();
 

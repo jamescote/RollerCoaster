@@ -5,7 +5,9 @@
 
 #pragma once
 
-#include <iostream> 
+#define GLM_ENABLE_EXPERIMENTAL
+
+#include <iostream>
 #include <fstream>
 #include <iterator>
 #include <vector>
