@@ -111,9 +111,7 @@ GLuint ShaderManager::genVertexBuffer( GLuint iVertArray,
 									   const void* pData, GLsizeiptr pSize, GLenum usage )
 {
 	GLuint iVertexBufferLoc;
-
 	glBindVertexArray( iVertArray );
-	
 	glGenBuffers( 1, &iVertexBufferLoc );
 	glBindBuffer( GL_ARRAY_BUFFER, iVertexBufferLoc );
 	glBufferData( GL_ARRAY_BUFFER, pSize, pData, usage );
@@ -121,7 +119,6 @@ GLuint ShaderManager::genVertexBuffer( GLuint iVertArray,
 	glEnableVertexAttribArray( iSpecifiedIndex );
 
 	glBindVertexArray( 0 );
-	
 	return iVertexBufferLoc;
 }
 

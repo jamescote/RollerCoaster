@@ -5,15 +5,11 @@
 /***********\
  * DEFINES *
 \***********/
-#define DEFAULT_DELTA 0.05f
-#define SUBDIVISION_COUNT 8
-#define DELTA_S 1.f
+#define SUBDIVISION_COUNT 4
 #define DELTA_ST 0.01f
-#define DELTA_T 0.01f
-#define MIN_VELOCITY 0.25f
-#define SPEED_CONST 5.0f
+#define DELTA_T 0.009f
+#define MIN_VELOCITY 0.1f
 #define TRACK_WIDTH 0.05f
-#define DECEL_BEGIN_ANGLE -5.0f
 #define DECEL_THRESHOLD(fD) (fD * 0.9f)
 #define GRAVITY 9.81f
 #define POSITION_OFFSET 0.025f
@@ -31,6 +27,8 @@ Anim_Track::Anim_Track( long lID, const string* sContourFile, const string* pMes
 	m_sTextureFile = *pTexLoc;
 	m_bOpenCurve = bOpen;
 
+	// Initialize Animation Track
+	loadAnimTrack( m_sContourFile );
 	initializeTrack();
 }
 
@@ -50,6 +48,19 @@ Anim_Track& Anim_Track::operator=( const Anim_Track& pRHS )
 	this->m_sMeshFile = pRHS.m_sMeshFile;
 	this->m_sTextureFile = pRHS.m_sTextureFile;
 	this->m_bOpenCurve = pRHS.m_bOpenCurve;
+	this->m_vKeyFrames = pRHS.m_vKeyFrames;
+	this->m_vKeyFrameTable = pRHS.m_vKeyFrameTable;
+	this->m_fCurveLength = pRHS.m_fCurveLength;
+	this->m_fDistToFreeFall = pRHS.m_fDistToFreeFall;
+	this->m_fMaxHeight = pRHS.m_fMaxHeight;
+	this->m_fMinHeight = pRHS.m_fMinHeight;
+	this->m_vDecelStartPosition = pRHS.m_vDecelStartPosition;
+
+	for ( int i = 0; i < 2; ++i )
+		this->m_vTrackFrames[ i ] = pRHS.m_vTrackFrames[ i ];
+
+	this->m_vTracks = pRHS.m_vTracks;
+
 
 	// Initialize Track based on same input files.
 	initializeTrack();
@@ -59,10 +70,9 @@ Anim_Track& Anim_Track::operator=( const Anim_Track& pRHS )
 
 void Anim_Track::initializeTrack()
 {
-	loadAnimTrack( m_sContourFile );
-	assert( m_vKeyFrames.size() != 0 );
+	assert( m_vKeyFrameTable.size() != 0 );
 	m_fCurrDist = 0.f;
-	m_fCurrHeight = m_vKeyFrames.front().y;
+	m_fCurrHeight = m_vKeyFrameTable.front().vPosition.y;
 	m_eCurrentState = LIFTING_STATE;
 
 	// Create Vertex Array for Rendering Track
@@ -83,7 +93,7 @@ void Anim_Track::initializeTrack()
 	else m_pTexture = nullptr;
 
 	// Generate Vertex buffer for curve.
-	m_iVertexBuffer = ShaderManager::getInstance()->genVertexBuffer( m_iVertexArray, 0, 3, m_vKeyFrames.data(), m_vKeyFrames.size() * sizeof( vec3 ), GL_STATIC_DRAW );
+	m_iVertexBuffer = ShaderManager::getInstance()->genVertexBuffer( m_iVertexArray, 0, 3, m_vTracks.data(), m_vTracks.size() * sizeof( vec3 ), GL_DYNAMIC_DRAW );
 }
 
 // Destructor
@@ -97,94 +107,6 @@ Anim_Track::~Anim_Track()
 
 	glDeleteBuffers( 1, &m_iVertexBuffer );
 	glDeleteVertexArrays( 1, &m_iVertexArray );
-}
-
-// loadAnimTrack
-// Takes in a set of keyframes loaded from a file.  Temporary function, may switch to take in a file to load the keyframes from.
-// Function taken from provided Vec3f_FileIO.h:
-// i) Reads in file (e.g. text file (.txt) or contour file (.con)).
-// ii) Parses it line by line.
-// iii) Extracts the first three floating point values (ignoring all other values)
-// iv) Stores these values as a Vec3f in a vector container
-void Anim_Track::loadAnimTrack( const string& pContourFile )
-{
-	using std::string;
-	using std::stringstream;
-	using std::istream_iterator;
-
-	// Set up input stream
-	std::ifstream file( pContourFile );
-
-	// Error opening file.
-	if ( !file )
-	{
-		cout << "Could not open " << pContourFile << " for Animation Track." << endl;
-		return;
-	}
-
-	// Local Variables.
-	vec3 v;
-	string line;
-	size_t index;
-	stringstream ss( std::ios_base::in );
-	size_t lineNum = 0;
-
-	// Clear keyframes
-	m_vKeyFrames.clear();
-
-	// Get line by line
-	while ( getline( file, line ) )
-	{
-		++lineNum;
-
-		// remove comments
-		index = line.find_first_of( "#" );
-		if ( index != string::npos )
-		{
-			line.erase( index, string::npos );
-		}
-
-		// removes leading/tailing junk
-		line.erase( 0, line.find_first_not_of( " \t\r\n\v\f" ) );
-		index = line.find_last_not_of( " \t\r\n\v\f" ) + 1;
-		if ( index != string::npos )
-		{
-			line.erase( index, string::npos );
-		}
-
-		if ( line.empty() )
-		{
-			continue; // empty or commented out line
-		}
-
-		// read line into string stream and clear any flags
-		ss.str( line );
-		ss.clear();
-
-		// store the position into the vec3f
-		ss >> v.x;
-		ss >> v.y;
-		ss >> v.z;
-
-		// No issues, store the position
-		if ( !( ss.fail() || ss.bad() ) )
-			m_vKeyFrames.push_back( v );
-	}
-	file.close();
-
-	// Smooth out curve.
-	for ( int i = 0; i < SUBDIVISION_COUNT; ++i )
-		smoothCurve();
-
-	// PreProcess for easier position access and evaluation
-	preProcessCurve();
-
-	// Calculate Total Curve Length
-	m_fCurveLength = ((float)(m_vKeyFrames.size() - 1) * DELTA_ST)
-		+ length( m_vKeyFrames.front() - m_vKeyFrames.back() );
-
-	// Generate Tracks for the Car.
-	generateTrackFrames();
 }
 
 // render
@@ -203,6 +125,7 @@ void Anim_Track::draw( )
 	// Upload new Indices
 #ifdef DEBUG	// For Debugging
 	vec3 vColor( 0.5 );
+	mat4 vCurrFrenetFrame = getFreNetFrames();
 	glPointSize( 10.f );
 	glUseProgram( ShaderManager::getInstance()->getProgram( ShaderManager::eShaderType::WORLD_SHDR ) );
 	vector< vec3 > vTemps = { vec3( 0.0f ), getPosition() };
@@ -212,8 +135,8 @@ void Anim_Track::draw( )
 	//glDrawArrays( GL_LINES, 0, 2 );
 
 	vTemps.clear();
-	vTemps.push_back( vec3( m_m4CurrentFrenetFrame[ 3 ] ) );
-	vTemps.push_back( vec3( m_m4CurrentFrenetFrame[ 3 ] ) + getCentripetalAcce() );
+	vTemps.push_back( vec3( vCurrFrenetFrame[ 3 ] ) );
+	vTemps.push_back( vec3( vCurrFrenetFrame[ 3 ] ) + getCentripetalAcce( m_fCurrDist ) );
 	glBufferData( GL_ARRAY_BUFFER, vTemps.size() * sizeof( vec3 ), vTemps.data(), GL_DYNAMIC_DRAW );
 	ShaderManager::getInstance()->setUniformVec3( ShaderManager::eShaderType::WORLD_SHDR, "vColor", &vColor );
 	//glDrawArrays( GL_POINTS, 0, vTemps.size() );
@@ -246,8 +169,8 @@ void Anim_Track::draw( )
 		//	Green = Normal
 		//	Blue = Tangent
 		vTemps.clear();
-		vTemps.push_back( vec3( m_m4CurrentFrenetFrame[ 3 ] ) );
-		vTemps.push_back( vec3( m_m4CurrentFrenetFrame[ 3 ] + (m_m4CurrentFrenetFrame[ i ] * 0.5) ) );
+		vTemps.push_back( vec3( vCurrFrenetFrame[ 3 ] ) );
+		vTemps.push_back( vec3( vCurrFrenetFrame[ 3 ] + (vCurrFrenetFrame[ i ] * 0.5) ) );
 		glBufferData( GL_ARRAY_BUFFER, vTemps.size() * sizeof( vec3 ), vTemps.data(), GL_DYNAMIC_DRAW );
 		ShaderManager::getInstance()->setUniformVec3( ShaderManager::eShaderType::WORLD_SHDR, "vColor", &mTemp[ i ] );
 		glDrawArrays( GL_POINTS, 0, vTemps.size() );
@@ -256,16 +179,23 @@ void Anim_Track::draw( )
 	glPointSize( 1.0f );
 #endif
 
+	// Defined Colors for Track.
+	vec3 vBrown( 0.545, 0.270, 0.074 );
+	vec3 vSilver( 0.752, 0.752, 0.752 );
+
 	// Draw Main Curve
 	glUseProgram( ShaderManager::getInstance()->getProgram( ShaderManager::eShaderType::RC_TRACK_SHDR ) );
+	ShaderManager::getInstance()->setUniformVec3( ShaderManager::eShaderType::RC_TRACK_SHDR, "vColor", &vBrown );
 	glBindBuffer( GL_ARRAY_BUFFER, m_iVertexBuffer );
-	glBufferData( GL_ARRAY_BUFFER, m_vKeyFrames.size() * sizeof( vec3 ), m_vKeyFrames.data(), GL_DYNAMIC_DRAW );
-	glDrawArrays( GL_LINE_LOOP, 0, m_vKeyFrames.size() );
 
+	// Draw connecting lines
+	glBufferData( GL_ARRAY_BUFFER, m_vTracks.size() * sizeof( vec3 ), m_vTracks.data(), GL_DYNAMIC_DRAW );
+	glDrawArrays( GL_LINES, 0, m_vTracks.size() );
+
+	ShaderManager::getInstance()->setUniformVec3( ShaderManager::eShaderType::RC_TRACK_SHDR, "vColor", &vSilver );
 	// Draw Track
 	for ( int i = 0; i < 2; ++i )
 	{
-		glBindBuffer( GL_ARRAY_BUFFER, m_iVertexBuffer );
 		glBufferData( GL_ARRAY_BUFFER, m_vTrackFrames[i].size() * sizeof( vec3 ), m_vTrackFrames[ i ].data(), GL_DYNAMIC_DRAW );
 		glDrawArrays( GL_LINE_LOOP, 0, m_vTrackFrames[ i ].size() );
 	}
@@ -274,6 +204,7 @@ void Anim_Track::draw( )
 	glBindVertexArray( iCurrVABinding );
 }
 
+
 // animate
 //		Called from container object to update the Animation.
 //		Updates the Current Distance by Velocity and evaluates any stat changes.
@@ -281,13 +212,115 @@ void Anim_Track::animate()
 {
 	m_fCurrDist = wrap( m_fCurrDist + (getVelocity( m_fCurrDist ) * DELTA_T) );
 	m_fCurrHeight = getPosition().y;
-	computeFreNetFrames();
 	m_eCurrentState = getState( m_fCurrDist );
 }
 
 /*******************************************************************************\
 * Private Functions  														   *
 \*******************************************************************************/
+
+// loadAnimTrack
+// Takes in a set of keyframes loaded from a file.  Temporary function, may switch to take in a file to load the keyframes from.
+// Function taken from provided Vec3f_FileIO.h:
+// i) Reads in file (e.g. text file (.txt) or contour file (.con)).
+// ii) Parses it line by line.
+// iii) Extracts the first three floating point values (ignoring all other values)
+// iv) Stores these values as a Vec3f in a vector container
+void Anim_Track::loadAnimTrack( const string& pContourFile )
+{
+	using std::string;
+	using std::stringstream;
+	using std::istream_iterator;
+
+	// Set up input stream
+	std::ifstream file( pContourFile );
+
+	// Error opening file.
+	if ( !file )
+	{
+		cout << "Could not open " << pContourFile << " for Animation Track." << endl;
+		return;
+	}
+
+	// Local Variables.
+	vec3 v;
+	string line;
+	size_t index;
+	stringstream ss( std::ios_base::in );
+	TableEntry vNewEntry;
+
+	// Clear keyframes
+	m_vKeyFrames.clear();
+
+	// Get line by line
+	while ( getline( file, line ) )
+	{
+		// remove comments
+		index = line.find_first_of( "#" );
+		if ( index != string::npos )
+		{
+			line.erase( index, string::npos );
+		}
+
+		// removes leading/tailing junk
+		line.erase( 0, line.find_first_not_of( " \t\r\n\v\f" ) );
+		index = line.find_last_not_of( " \t\r\n\v\f" ) + 1;
+		if ( index != string::npos )
+		{
+			line.erase( index, string::npos );
+		}
+
+		if ( line.empty() )
+		{
+			continue; // empty or commented out line
+		}
+
+		// read line into string stream and clear any flags
+		ss.str( line );
+		ss.clear();
+
+		// store the position into the vec3f
+		ss >> v.x;
+		ss >> v.y;
+		ss >> v.z;
+
+		// No issues, store the position
+		if ( !(ss.fail() || ss.bad()) )
+			m_vKeyFrames.push_back( v );
+	}
+	file.close();
+
+	// Smooth out curve.
+	for ( int i = 0; i < SUBDIVISION_COUNT; ++i )
+		smoothCurve();
+
+	// PreProcess for easier position access and evaluation
+	arcLengthParameterize();
+
+	// Calculate Total Curve Length by stepping along the curve.
+	vector<vec3>::iterator iPrev = m_vKeyFrames.begin();
+	m_fCurveLength = 0.0f;
+	for ( vector<vec3>::iterator iter = m_vKeyFrames.begin() + 1;
+		  iter != m_vKeyFrames.end();
+		  ++iter )
+	{
+		m_fCurveLength += length( (*iter) - (*iPrev) );
+		iPrev = iter;
+	}
+
+	// Set up Key frame table, storing FreNet Frames
+	for ( unsigned int i = 0; i < m_vKeyFrames.size(); ++i )
+	{
+		// Store Position
+		vNewEntry.vPosition = m_vKeyFrames[ i ];
+		m_fCurrHeight = vNewEntry.vPosition.y;	// Track Current Height for Velocity Calculation
+		computeFreNetFrames( (float) i * DELTA_ST, vNewEntry.m4FrenetFrame );
+		m_vKeyFrameTable.push_back( vNewEntry );	// Store Entry
+	}
+
+	// Generate Tracks for the Car.
+	generateTrackFrames();
+}
 
 // smoothCurve: pre-processes the curve by splitting the curve into several smaller segments
 //		Each of which have, at most, size delta which is evaluated as the smallest distance between
@@ -320,35 +353,45 @@ void Anim_Track::smoothCurve()
 	else
 		vShiftedCurve.push_back( vNewCurve.front() );
 
-	// 2nd pass: shift everything over.
-	v_iNextPoint = vNewCurve.begin();
-	v_iCurrPoint = v_iNextPoint++;
-
-	while ( v_iNextPoint != vNewCurve.end() )
+	// 2nd pass: shift everything over. Repeat 3 Times.
+	for ( int i = 0; i < 3; ++i )
 	{
-		vShiftedCurve.push_back( ((*v_iCurrPoint) + (*v_iNextPoint)) * 0.5f );
+		// Set up
+		v_iNextPoint = vNewCurve.begin();
 		v_iCurrPoint = v_iNextPoint++;
+
+		// Loop through and shift.
+		while ( v_iNextPoint != vNewCurve.end() )
+		{
+			vShiftedCurve.push_back( ((*v_iCurrPoint) + (*v_iNextPoint)) * 0.5f );
+			v_iCurrPoint = v_iNextPoint++;
+		}
+
+		// Shift point over between first and last points on a closed curve.
+		if ( !m_bOpenCurve )
+			vShiftedCurve.push_back( ((*v_iCurrPoint) + vNewCurve.front()) * 0.5f );
+
+		// Store generated curve and reset for potential next loop
+		vNewCurve.clear();
+		vNewCurve = vShiftedCurve;
+		vShiftedCurve.clear();
 	}
 
-	// Shift point over between first and last points on a closed curve.
-	if ( !m_bOpenCurve )
-		vShiftedCurve.push_back( ((*v_iCurrPoint) + vNewCurve.front()) * 0.5f);
-
 	// Finally, swap new set to stored set
-	m_vKeyFrames.swap( vShiftedCurve );
+	m_vKeyFrames.swap( vNewCurve );
 }
 
 // preProcessCurve: creates a new curve with a uniform distance of Delta_S between points.
-void Anim_Track::preProcessCurve( )
+void Anim_Track::arcLengthParameterize( )
 {
 	// Locals
 	vector< vec3 > vNewCurve;
 	vector< vec3 >::iterator v_iNextPos;
-	vec3 vCurrPos;
+	float fCurrDist = 0.0f;
+	vec3 vCurrPos = m_vKeyFrames.front();
 	v_iNextPos = m_vKeyFrames.begin() + 1;
-	vCurrPos = m_vKeyFrames.front();
-	m_fMaxHeight = vCurrPos.y;
-	m_fMinHeight = vCurrPos.y;
+	m_fMaxHeight = -numeric_limits<float>::infinity();
+	m_fMinHeight = numeric_limits<float>::infinity();
 	m_fDistToFreeFall = 0.0f;
 
 	// Push on current point, evaluate from here
@@ -357,16 +400,43 @@ void Anim_Track::preProcessCurve( )
 	// Go through each point to set a set distance between each point.
 	while ( v_iNextPos != m_vKeyFrames.end() )
 	{
-		// Distance too small? evaluate next point and try again
-		if ( length( *v_iNextPos - vCurrPos ) < DELTA_ST )
-			v_iNextPos++;
-		else
+		// Create Direction Vector, add length and normalize for stepping.
+		vec3 vTarget = (*v_iNextPos) - vCurrPos;
+		fCurrDist += length( vTarget );
+		vTarget = normalize( vTarget );
+
+		// Loop through Vector at set rate.
+		while ( fCurrDist >= DELTA_ST )
 		{
-			// If the distance is too long, truncate it to the set size and add new point to list
-			vNewCurve.push_back( vCurrPos + (normalize(*v_iNextPos - vCurrPos) * DELTA_ST ) );
+			// Next step marked.
+			fCurrDist -= DELTA_ST;
+			vNewCurve.push_back( (vCurrPos) + (DELTA_ST) * vTarget );	// Store Point
+			
+			// Set new point 
 			vCurrPos = vNewCurve.back();
 
-			// Evaluate min and max height as curve is pieced through
+			// Evaluate Height information of track for velocity.
+			evalHeight( vNewCurve.back().y, vNewCurve.size() * DELTA_ST );
+		}
+
+		// Iterate.
+		v_iNextPos++;
+	}
+
+	// Close off curve.
+	if ( !m_bOpenCurve )
+	{
+		vec3 vTarget = m_vKeyFrames.front() - vCurrPos;
+		fCurrDist += length( vTarget );
+		vTarget = normalize( vTarget );
+
+		while ( fCurrDist >= DELTA_ST )
+		{
+			fCurrDist -= DELTA_ST;
+			vNewCurve.push_back( (vCurrPos) + (DELTA_ST) * vTarget );
+
+			vCurrPos = vNewCurve.back();
+
 			evalHeight( vNewCurve.back().y, vNewCurve.size() * DELTA_ST );
 		}
 	}
@@ -379,59 +449,49 @@ void Anim_Track::preProcessCurve( )
 void Anim_Track::generateTrackFrames()
 {
 	// Locals
-	vector< vec3 >::iterator v_iCurrPos, v_iNextPos;
-	vec3 vBiNormal, vCurrPos;
 	LEFT_TRACK.reserve( m_vKeyFrames.size() );		// Reserve necessary space for the tracks
 	RIGHT_TRACK.reserve( m_vKeyFrames.size() );		// Reserve necessary space for the tracks
-	v_iNextPos = m_vKeyFrames.begin();
-	v_iCurrPos = v_iNextPos++;
-	float fCurrDist = 0.f;
+	m_vTracks.reserve( m_vKeyFrames.size() << 1 );	// Reserve Necessary space for track bars
 	float fHalfWidth = TRACK_WIDTH * 0.5f;
 
-	// Track lengths will be the same so only one loop needed
-	while ( v_iNextPos != m_vKeyFrames.end() )
+	for ( vector<TableEntry>::const_iterator iter = m_vKeyFrameTable.begin();
+		 iter != m_vKeyFrameTable.end();
+		 ++iter )
 	{
-		// get binormal and position then create the track pointsfIndexedDist
-		vBiNormal = normalize( cross( computeNormal( fCurrDist ), normalize( getTangent( fCurrDist ) ) ) );
-		vCurrPos = getPosition(fCurrDist);
-		LEFT_TRACK.push_back( vCurrPos + (vBiNormal * -fHalfWidth ) );
-		RIGHT_TRACK.push_back( vCurrPos + (vBiNormal * fHalfWidth ) );
+		// Index 0 of the frenet frame matrix is the binormal
+		LEFT_TRACK.push_back( iter->vPosition + vec3(normalize( iter->m4FrenetFrame[0] ) * -fHalfWidth) );
+        RIGHT_TRACK.push_back( iter->vPosition + vec3(normalize( iter->m4FrenetFrame[0] ) * fHalfWidth ) );
 
-		// Iterate through
-		fCurrDist += DELTA_ST;
-		v_iCurrPos = v_iNextPos++;
+		// Store both points for track drawing
+		m_vTracks.push_back( LEFT_TRACK.back() );
+		m_vTracks.push_back( RIGHT_TRACK.back() );
 	}
-
-	// Last Point
-	//vBiNormal = normalize( cross( normalize( getTangent( fCurrDist ) ), normalize( computeNormal( fCurrDist ) ) ) );
-	//vCurrPos = getPosition( fCurrDist );
-	//LEFT_TRACK.push_back( vCurrPos + (vBiNormal * -fHalfWidth) );
-	//RIGHT_TRACK.push_back( vCurrPos + (vBiNormal * fHalfWidth) );
 }
 
 // Returns an Arc-Length distance at a certain point along the curve.
 vec3 Anim_Track::getPosition( float sDist )
 {
 	// Locals
-	vec3 fReturnDist = vec3( 0.f );
+	vec3 vReturnPos = vec3( 0.f );
 
 	// Evaluate the index from the current distance on the track
 	sDist = wrap( sDist );
-	float fIndexedDist = (float)sDist / (float)DELTA_ST;
-	float fNextIndexedDist = wrap( sDist + DELTA_ST ) / (float) DELTA_ST;
-	int iIndex = (unsigned int) fIndexedDist;//(fIndexedDist >= m_vKeyFrames.size() ? fIndexedDist - m_vKeyFrames.size() : fIndexedDist);
-	int iNextIndex = (unsigned int) fNextIndexedDist;//(iIndex + 1) < m_vKeyFrames.size() ? (iIndex + 1) : 0;
+	float fIndexedDist = (float)sDist / (float)DELTA_ST; // Divide to get index to array
+	int iIndex = (unsigned int) fIndexedDist; // Store index
+	int iNextIndex = (unsigned int) (iIndex + 1) < m_vKeyFrames.size() ? (iIndex + 1) : 0; // evaluate next index
+	float t = (fIndexedDist - (float)iIndex); // get value for interpolation.
 
 	// Get interpolated distance
-	fReturnDist = m_vKeyFrames[ iIndex ] +
-		((m_vKeyFrames[ iNextIndex ] - m_vKeyFrames[ iIndex ]) * (fIndexedDist - (float)iIndex));
+	vReturnPos = (1-t) * m_vKeyFrames[ iIndex ] + t * m_vKeyFrames[ iNextIndex ];
 
-	return fReturnDist;
+	// Return Position.
+	return vReturnPos;
 }
 
 // Evaluate the current roller coaster state.
 Anim_Track::eCurrVelocityState Anim_Track::getState( float fDist )
 {
+	// Get Current position and set default return.
 	vec3 vPosAtDist = getPosition( fDist );
 	eCurrVelocityState eReturnState = GRAVITY_FREE_FALL;
 
@@ -442,6 +502,7 @@ Anim_Track::eCurrVelocityState Anim_Track::getState( float fDist )
 	else												// Anything else is the Lifting Stage
 		eReturnState = LIFTING_STATE;
 
+	//eReturnState = GRAVITY_FREE_FALL;
 	return eReturnState;
 }
 
@@ -457,67 +518,80 @@ float Anim_Track::getVelocity( float fDist )
 	switch ( getState( fDist ) )
 	{
 		case GRAVITY_FREE_FALL:	// Free Fall, just use Gravity
-			fReturnVelocity = sqrt( (2.0f * GRAVITY) * (m_fMaxHeight - m_fCurrHeight) );
+			fReturnVelocity = sqrt( (2.0f * GRAVITY) * abs(m_fMaxHeight - m_fCurrHeight) );
 			break;
 		case DECELERATION:	// Deceleration Stage -> coming to a stop.
 			fDecel_Start_Velocity =
-				sqrt( (2.0f * GRAVITY) * (m_fMaxHeight - getPosition( DECEL_THRESHOLD( m_fCurveLength ) ).y ) );
-			fDecelDistance = m_fCurveLength - DECEL_THRESHOLD( m_fCurveLength );
-			fReturnVelocity = fDecel_Start_Velocity * ((m_fCurveLength - m_fCurrDist) / fDecelDistance);
+				sqrt( (2.0f * GRAVITY) * (m_fMaxHeight - m_fCurrHeight ) ); // Get beginning Velocity (Free Fall)
+			fDecelDistance = m_fCurveLength - DECEL_THRESHOLD( m_fCurveLength ); // Total Deceleration Distance
+			fReturnVelocity = fDecel_Start_Velocity * ((m_fCurveLength - m_fCurrDist) / fDecelDistance); // Slow Down velocity
 			break;
 	}
 
-	// Truncate the Velocity to a Minimum.
+	// Set a minimum velocity 
 	fReturnVelocity = fReturnVelocity < MIN_VELOCITY ? MIN_VELOCITY : fReturnVelocity;
 
-	return fReturnVelocity * 0.5;
+	// Return
+	return fReturnVelocity;
 }
 
-// Computes FreNet Frames for the Containing Object to position its model with
-void Anim_Track::computeFreNetFrames()
+// Get the interpolated frenetframe for the current position.
+mat4 Anim_Track::getFreNetFrames()
 {
-	vec3 vTangent = normalize( getTangent( m_fCurrDist ) );
-	vec3 vBiNormal = normalize( computeBiNormal( vTangent ) );
-	vec3 vNormal = normalize( cross( vTangent, vBiNormal  ) );
+	// Local Variables
+    mat4 m4CurrFrame;
+    float fPos = wrap( m_fCurrDist );
+    float t = fPos / DELTA_ST;
+    unsigned int iIndex = (unsigned int) t;
+    unsigned int iNextIndex = (unsigned int) (iIndex + 1) < m_vKeyFrameTable.size() ? iIndex + 1 : 0;
+    t = t - (float)iIndex;
+
+	// Interpolate between Frenet frames
+    m4CurrFrame = (1-t) * m_vKeyFrameTable[ iIndex ].m4FrenetFrame +
+                  t * m_vKeyFrameTable[ iNextIndex ].m4FrenetFrame;
+
+	// Return result.
+    return m4CurrFrame;
+}
+
+// Compute the frenetframes for a given position.
+void Anim_Track::computeFreNetFrames( float fCurrPos, mat4& m4ReturnFrames )
+{
+	// Find Tangent, BiNormal and Normal
+	vec3 vTangent = normalize( getTangent( fCurrPos ) );
+	vec3 vBiNormal = normalize( computeBiNormal( fCurrPos, vTangent ) );
+	vec3 vNormal = normalize( cross( vTangent, vBiNormal ) );
 
 	// mat4 is column wise
-	m_m4CurrentFrenetFrame[ 0 ] = vec4( vBiNormal, 0.0f );		// Column 1: Binormal
-	m_m4CurrentFrenetFrame[ 1 ] = vec4( vNormal, 0.0f );		// Column 2: Normal
-	m_m4CurrentFrenetFrame[ 2 ] = vec4( vTangent, 0.0f );		// Column 3: Tangent
-	m_m4CurrentFrenetFrame[ 3 ] = vec4( getPosition() + (vNormal * POSITION_OFFSET), 1.0f );	// Column 4: Translation to Position
-
+	m4ReturnFrames[ 0 ] = vec4( vBiNormal, 0.0f );		// Column 1: Binormal
+	m4ReturnFrames[ 1 ] = vec4( vNormal, 0.0f );		// Column 2: Normal
+	m4ReturnFrames[ 2 ] = vec4( vTangent, 0.0f );		// Column 3: Tangent
+	m4ReturnFrames[ 3 ] = vec4( getPosition( fCurrPos ) + (vNormal * POSITION_OFFSET), 1.0f );	// Column 4: Translation to Position
 }
 
 // Returns the Centripetal Acceleration based on the curvature at the given position on the animation track
 vec3 Anim_Track::getCentripetalAcce( float fDist )
 {
-	// Calculate the Centripetal Acceleration as: **THIS WASN'T WORKING**
-	//		(1 / (x^2 + c^2)) * (p'[i+1] - 2p[i] + p'[i-1])
-	vec3 vReturnValue;
-	/*vec3 vReturnValue = (getPosition( fDist + DELTA_S ) - 2.0f * getPosition( fDist ) + getPosition( fDist - DELTA_S )) / (DELTA_S * DELTA_S);
-	float fX = length( vReturnValue ) * 0.5f;												// 1/2 * (p'[i+1] - 2p[i] + p'[i-1])
-	float fC = length( getPosition( fDist + DELTA_S ) - getPosition( fDist - DELTA_S ) )	// 1/2 * (p'[i+1] - p'[i-1])
-		* 0.5f;
-	vReturnValue *= 2.0f*fX / ((fX*fX) + (fC*fC));/*/
-	float fCurrVelocity = getVelocity( fDist );
+	// Locals
+	vec3 a = getTangent( fDist + (getVelocity( fDist ) * DELTA_T) );
+	vec3 b = getTangent( fDist );
+	vec3 vReturn = vec3( 0.0f );
 
-	/*vReturnValue = fCurrVelocity * fCurrVelocity *
-		(getPosition( fDist + DELTA_S ) - 2.0f * getPosition( fDist ) + getPosition( fDist - DELTA_S )) / (DELTA_S * DELTA_S) +
-		vec3( 0.0f, GRAVITY, 0.0f ) + ((getVelocity( fDist + fCurrVelocity * DELTA_T ) - fCurrVelocity) / DELTA_T) *
-		getTangent( fDist );   Recreation of Code from handout -> This Works, Previous one did not */
+	// Ignore Centripetal Acceleration on linear sections of curve ||A x B|| ~= 0
+	if ( length( cross( a, b ) ) >= FLT_EPSILON )
+		vReturn = (a - b) / DELTA_T;
 
-	vReturnValue = (getTangent( fDist + (getVelocity( fDist ) * DELTA_T) ) - getTangent( fDist )) / DELTA_T;
-
-	return vReturnValue;
+	// Return
+	return vReturn;
 }
 
-// Computes the BiNormal given a Tangent
-vec3 Anim_Track::computeBiNormal( const vec3& vTangent )
+// Cross between Track Up Vector and Tangent
+vec3 Anim_Track::computeBiNormal( float fDist, const vec3& vTangent )
 {
-	return cross( computeNormal(), vTangent );
+	return cross( computeNormal( fDist ), vTangent );
 }
 
-// Computes the Normal at a given point on the track.
+// Computes the Normal at a given point on the track => centripetal acceleration + gravity.
 vec3 Anim_Track::computeNormal( float fDist )
 {
 	return getCentripetalAcce( fDist ) + vec3( 0.0f, GRAVITY, 0.0f );

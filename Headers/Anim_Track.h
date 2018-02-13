@@ -18,18 +18,24 @@ public:
 	void loadAnimTrack( const string& pContourFile );
 	void animate();
 	vec3 getPosition() { return getPosition( m_fCurrDist ); }
-	mat4 getFreNetFrames() { return m_m4CurrentFrenetFrame; }
+        mat4 getFreNetFrames();
 
 private:
 	void initializeTrack();
 	// Vector of Points on Curve
-	vector< vec3 > m_vKeyFrames, m_vTrackFrames[2];
+	vector< vec3 > m_vKeyFrames, m_vTrackFrames[2], m_vTracks;
 	string m_sContourFile, m_sMeshFile, m_sTextureFile;
 
 	//  Vertex Array and Buffer
 	GLuint m_iVertexArray, m_iVertexBuffer;
 
 	// Private Variables
+	struct TableEntry
+	{
+		vec3 vPosition;
+		mat4 m4FrenetFrame;
+	};
+	vector< TableEntry > m_vKeyFrameTable;
 	float m_fCurveLength;
 	long m_lID;
 	bool m_bOpenCurve;
@@ -51,19 +57,17 @@ private:
 
 	// Private Functions
 	void smoothCurve();
-	void preProcessCurve();
+	void arcLengthParameterize();
 	void generateTrackFrames();
 	vec3 getPosition( float sDist );
 	vec3 getTangent( float fDist );
 	float getVelocity( float fDist );
 	float getHorizonAngle() { return dot( getTangent( m_fCurrDist ), vec3( 1.0f, 0.0f, 1.0f ) ); }
 
-	void computeFreNetFrames();
-	vec3 computeBiNormal( const vec3& vTangent );
+	void computeFreNetFrames( float fCurrPos, mat4& m4ReturnFrames );
+	vec3 computeBiNormal( float fDist, const vec3& vTangent );
 	vec3 computeNormal( float fDist );
-	vec3 computeNormal() { return computeNormal( m_fCurrDist ); }
 	vec3 getCentripetalAcce( float fDist );
-	vec3 getCentripetalAcce() { return getCentripetalAcce( m_fCurrDist ); }
 
 	inline float wrap( float s )
 	{

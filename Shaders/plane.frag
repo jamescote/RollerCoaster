@@ -14,7 +14,7 @@ void main (void)
 {
 	vec4 plane_color;
 	if( !bTextureLoaded )
-		plane_color = vec4( 1.0 );
+		plane_color = vec4( 0.133, 0.545, 0.133, 1.0 );
 	else
 		plane_color = texture(gSampler,texturePos);
 

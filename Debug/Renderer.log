@@ -1,4 +1,3 @@
 ﻿  Anim_Track.cpp
-u:\documents\cpsc591\rollercoaster\source\anim_track.cpp(472): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
   Renderer.vcxproj -> U:\Documents\CPSC591\RollerCoaster\Debug\Renderer.exe
   Renderer.vcxproj -> U:\Documents\CPSC591\RollerCoaster\Debug\Renderer.pdb (Full PDB)
