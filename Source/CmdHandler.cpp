@@ -255,6 +255,14 @@ void CmdHandler::handleKeyBoardInput(int cKey, int iAction, int iMods)
 		break;
 	case(GLFW_KEY_UP):
 		break;
+	case(GLFW_KEY_C):
+		if( iAction == GLFW_RELEASE )
+			m_pGPXMngr->switchView();
+		break;
+	case(GLFW_KEY_P):
+		if ( iAction == GLFW_RELEASE )
+			m_pEnvMngr->pause();
+		break;
 	}
 }
 

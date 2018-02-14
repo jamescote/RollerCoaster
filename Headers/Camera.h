@@ -21,6 +21,9 @@ public:
 	mat4 getPerspectiveMat();
 	vec3 getCameraWorldPos();
 	const vec3 getLookAt();
+	void setLookAt( vec3 vLookAt ) { m_vWorldLookAt = vLookAt; }
+	void positionCamera( mat4 frame ) { m_m4Frame = frame; }
+	void setSteady( bool bSteady ) { m_bSteady = bSteady; }
 
 	// Camera Manipulation Functions
 	void orbit( vec2 pDelta );
@@ -29,7 +32,9 @@ public:
 
 private:
 	vec3 m_vSPos, m_vWorldLookAt;
+	mat4 m_m4Frame;
 	bool m_bUpdated;
+	bool m_bSteady;
 	int m_iHeight, m_iWidth;
 	float m_fAspectRatio;
 

@@ -11,7 +11,7 @@ public:
 	~Light();
 
 	// Virtual inherited functions
-	void draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold );
+	void draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold, bool m_bPause );
 	string getType() { return "Light"; }
 
 	// Light Manipulation

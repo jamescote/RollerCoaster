@@ -47,7 +47,7 @@ Triangle::~Triangle()
 }
 
 // Simply draw a triangle using the plane shader (for Now);
-void Triangle::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold )
+void Triangle::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold, bool m_bPause )
 {
 	glBindVertexArray( m_iVertexArray );
 

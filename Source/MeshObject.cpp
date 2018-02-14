@@ -33,7 +33,7 @@ MeshObject::~MeshObject()
 }
 
 // draws the MeshObject by setting up the Shader
-void MeshObject::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold )
+void MeshObject::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold, bool m_bPause )
 {
 	ShaderManager* pShdrMngr = ShaderManager::getInstance();
 	mat4 pPositionTranslated = mat4( m_fScale );
@@ -46,7 +46,8 @@ void MeshObject::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxTh
 	// Draw the Animation Track
 	if ( nullptr != m_pAnimTrack )
 	{
-		m_pAnimTrack->animate();
+		if( !m_bPause )
+			m_pAnimTrack->animate();
 		pPositionTranslated = m_pAnimTrack->getFreNetFrames() * scale( vec3( m_fScale ) ) * toMat4( m_pQuaternion );
 		pShdrMngr->setUnifromMatrix4x4( ShaderManager::eShaderType::MESH_SHDR, "translate", &pPositionTranslated );
 		m_pAnimTrack->draw();

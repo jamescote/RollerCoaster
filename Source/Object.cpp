@@ -53,3 +53,14 @@ void Object::switchTexture( const string* sTexLoc )
 		m_pTexture = pNewTexture;
 	}
 }
+
+// If there's an Animation Track, return the Frenet frames, otherwise
+//	Return Identity matrix.
+mat4 Object::getFreNetFrames()
+{
+	mat4 pReturnObj = mat4( 1.0 ); // Identity Matrix to return as default
+	if ( nullptr != m_pAnimTrack )
+		pReturnObj = m_pAnimTrack->getFreNetFrames();
+
+	return pReturnObj;
+}

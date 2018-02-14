@@ -40,7 +40,7 @@ Sphere::~Sphere()
 }
 
 // Draw the Sphere
-void Sphere::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold )
+void Sphere::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold, bool m_bPause )
 {
 	ShaderManager* pShdrMngr = ShaderManager::getInstance();
 

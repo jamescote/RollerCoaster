@@ -9,7 +9,7 @@ public:
 	~Sphere();
 
 	// Overridden draw
-	void draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold );
+	void draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold, bool m_bPause );
 
 	// Overridden Type Output
 	string getType() { return "Sphere"; }

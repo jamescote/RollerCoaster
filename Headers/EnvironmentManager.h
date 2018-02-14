@@ -13,6 +13,7 @@ public:
 	~EnvironmentManager();
 
 	void initializeEnvironment(string sFileName);
+	void pause() { m_bPause = !m_bPause; }
 
 	// Clears the Environment so a new one can be loaded.
 	void purgeEnvironment();
@@ -26,6 +27,7 @@ public:
 
 	// Light Manipulation
 	void moveLight(vec3 pMoveVec);
+	mat4 getFrenetFrame();
 
 	// Edge Threshold Getters/Setters
 	void setMinThreshold( float fMin ) { m_fMinEdgeThreshold = fMin; }
@@ -45,6 +47,7 @@ private:
 
 	// Edge Threshold Implementation
 	float m_fMinEdgeThreshold, m_fMaxEdgeThreshold;
+	bool m_bPause;
 
 	// Declare friend class for Objects and lights so they can add themselves to the manager.
 	friend class Object3D;

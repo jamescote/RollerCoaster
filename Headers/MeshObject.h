@@ -15,9 +15,11 @@ public:
 	~MeshObject();
 
 	// Overloaded Virtual Functions from Object3D
-	void draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold );
+	void draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold, bool m_bPause );
 	string getType() { return "MeshObject"; }
 	string getDebugOutput();
+
+	mat4 getFreNetFrames();
 
 private:
 	// Private Constructor and Copy Constructor to restrict usage to Object_Factory

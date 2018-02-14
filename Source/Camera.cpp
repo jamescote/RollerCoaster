@@ -29,14 +29,18 @@
 #define Y_LOOK				m_vSPos[I_Y]
 #define Z_LOOK				m_vSPos[I_Z]
 
+const vec3 DEFAULT_POS = vec3( 90.f, 8.5308f, START_RADIUS ); // (Theta, Phi, Radius)
+
 // Constructor
 Camera::Camera( int iHeight, int iWidth )
 {
-	m_vSPos = vec3( 90.f, 8.5308f, START_RADIUS );	// (Theta, Phi, Radius)
+	m_vSPos = DEFAULT_POS;	
 	m_vWorldLookAt = vec3( 0.f, 0.f, 0.f );		// (X, Y, Z)
 	updateHxW( iHeight, iWidth );
+	m_m4Frame = mat4( 1.0 );
 
 	m_bUpdated = true;
+	m_bSteady = false;
 }
 
 // Copy Constructor
@@ -44,7 +48,10 @@ Camera::Camera( Camera& pCopy )
 {
 	m_vSPos = pCopy.m_vSPos;
 	m_vWorldLookAt = pCopy.m_vWorldLookAt;
+	m_m4Frame = pCopy.m_m4Frame;
+	updateHxW( pCopy.m_iHeight, pCopy.m_iWidth );
 	m_bUpdated = pCopy.m_bUpdated;
+	m_bSteady = pCopy.m_bSteady;
 }
 
 // Destructor
@@ -57,13 +64,13 @@ Camera::~Camera()
 mat4 Camera::getToCameraMat()
 {
 	vec3 vCamCPos = getCartesianPos();
-	return lookAt( vCamCPos, m_vWorldLookAt, vec3( 0.f, 1.f, 0.f ) );
+	return lookAt( vCamCPos, m_vWorldLookAt, vec3( m_m4Frame[1] ) );
 }
 
 // Generates toCamera Matrix and updates Uniform in ShaderManager.
 mat4 Camera::getPerspectiveMat()
 {
-	vec3 vCamCPos = getCartesianPos();
+	//vec3 vCamCPos = getCartesianPos();
 	return perspective( FOV_Y * PI / 180.f, m_fAspectRatio, Z_CLOSE, Z_FAR );
 }
 
@@ -86,17 +93,28 @@ vec3 Camera::getCartesianPos()
 	float fTheta_Rads = THETA * PI / 180.f;
 	vec3 vReturn;
 
-	vReturn.z = RADIUS * sin( fPhi_Rads );	// Z = r·sinϕ
-	vReturn.x = vReturn.z * sin( fTheta_Rads );		// use Z for X = r·sinϕ·sinθ
-	vReturn.x = abs( vReturn.x ) < FLT_EPSILON ? 0.f : vReturn.x;
-	vReturn.z *= cos( fTheta_Rads );			// Finish Z: Z = r·sinϕ·cosθ
-	vReturn.z = abs( vReturn.z ) < FLT_EPSILON ? 0.f : vReturn.z;
-	vReturn.y = RADIUS * cos( fPhi_Rads );	// Y: r·cosϕ
-	vReturn.y = abs( vReturn.y ) < FLT_EPSILON ? 0.f : vReturn.y;
+	if ( m_m4Frame == mat4( 1.0 ) )
+	{
+		vReturn.z = RADIUS * sin( fPhi_Rads );	// Z = r·sinϕ
+		vReturn.x = vReturn.z * sin( fTheta_Rads );		// use Z for X = r·sinϕ·sinθ
+		vReturn.x = abs( vReturn.x ) < FLT_EPSILON ? 0.f : vReturn.x;
+		vReturn.z *= cos( fTheta_Rads );			// Finish Z: Z = r·sinϕ·cosθ
+		vReturn.z = abs( vReturn.z ) < FLT_EPSILON ? 0.f : vReturn.z;
+		vReturn.y = RADIUS * cos( fPhi_Rads );	// Y: r·cosϕ
+		vReturn.y = abs( vReturn.y ) < FLT_EPSILON ? 0.f : vReturn.y;
+	
+		mat4 mLookAtTranslation = translate( mat4( 1.f ), m_vWorldLookAt );
+		vec4 mTranslatedPos = mLookAtTranslation * vec4( vReturn, 1.f );
+		vReturn = vec3( mTranslatedPos );
+	}
+	else
+	{
+		vec3 vTranslateBack = normalize( m_vWorldLookAt - vec3( m_m4Frame[ 3 ] ) ) * -0.1;
+		vTranslateBack += vec3( m_m4Frame[1] * 0.075 );
+		vReturn = vec3( translate( mat4( 1.f ), vTranslateBack ) * m_m4Frame[ 3 ] );	
+	}
 
-	mat4 mLookAtTranslation = translate( mat4( 1.f ), m_vWorldLookAt );
-	vec4 mTranslatedPos = mLookAtTranslation * vec4( vReturn, 1.f );
-	vReturn = vec3( mTranslatedPos );
+	
 
 	return vReturn;
 }
@@ -114,20 +132,24 @@ void Camera::updateHxW( int iHeight, int iWidth )
 // Rotatable 360 degrees around.  Laps if it goes over that limit.
 void Camera::orbit( vec2 pDelta )
 {
-	THETA += pDelta.x;
-	THETA = THETA > HORIZONTAL_LIMIT ? THETA - HORIZONTAL_LIMIT : THETA;
-	THETA = THETA < 0.f ? THETA + HORIZONTAL_LIMIT : THETA;
+	if ( !m_bSteady )
+	{
+		THETA += pDelta.x;
+		THETA = THETA > HORIZONTAL_LIMIT ? THETA - HORIZONTAL_LIMIT : THETA;
+		THETA = THETA < 0.f ? THETA + HORIZONTAL_LIMIT : THETA;
 
-	PHI += pDelta.y;
-	PHI = PHI < VERT_LOWER_LIMIT ? VERT_LOWER_LIMIT : PHI;
-	PHI = PHI > VERT_UPPER_LIMIT ? VERT_UPPER_LIMIT : PHI;
+		PHI += pDelta.y;
+		PHI = PHI < VERT_LOWER_LIMIT ? VERT_LOWER_LIMIT : PHI;
+		PHI = PHI > VERT_UPPER_LIMIT ? VERT_UPPER_LIMIT : PHI;
 
-	//cout << "CAMERA ORBIT: {" << THETA << ", " << PHI << "}" << endl;
+		//cout << "CAMERA ORBIT: {" << THETA << ", " << PHI << "}" << endl;
+	}
 }
 
 // Zoom in and out by a given Delta
 void Camera::zoom( float fDelta )
 {
+	
 	RADIUS -= fDelta;
 	RADIUS = RADIUS < ZOOM_MIN ? ZOOM_MIN : RADIUS;
 	RADIUS = RADIUS > ZOOM_MAX ? ZOOM_MAX : RADIUS;

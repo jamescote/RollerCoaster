@@ -31,6 +31,7 @@ public:
 	void rotateCamera(vec2 pDelta);
 	void zoomCamera(float fDelta);
 	void moveCamera( vec3 pDirection );
+	void switchView();
 
 	// Helper Enum for RGB Values
 	enum eRGB
@@ -68,6 +69,13 @@ private:
 
 	// Camera
 	Camera* m_pCamera;
+	enum cView
+	{
+		VIEW_SPHERICAL = 0,
+		VIEW_FPS,
+		VIEW_FOLLOW,
+		VIEW_MAX
+	} m_eView;
 
 	// Render Functions
 	void RenderScene();

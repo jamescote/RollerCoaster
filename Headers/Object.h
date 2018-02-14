@@ -11,9 +11,11 @@ public:
 	// Pure Virtual Intersection Function
 	// All inherited classes must implement their own
 	//		logic for this function.
-	virtual void draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold ) = 0;
+	virtual void draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold, bool m_bPause ) = 0;
 	virtual string getType() = 0;
 	virtual string getDebugOutput() = 0;
+
+	mat4 getFreNetFrames();
 
 	void switchTexture( const string* sTexLoc );
 

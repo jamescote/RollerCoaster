@@ -67,7 +67,7 @@ string Plane::getDebugOutput()
 }
 
 // Setup OpenGl to draw the Plane using the Plane Shader.
-void Plane::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold )
+void Plane::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold, bool m_bPause )
 {
 	glBindVertexArray( m_iVertexArray );
 

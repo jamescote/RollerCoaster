@@ -25,7 +25,7 @@ Light::~Light()
 	glDeleteVertexArrays(1, &m_iVertexArray);
 }
 
-void Light::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold )
+void Light::draw( const vec3& vCamLookAt, float fMinThreshold, float fMaxThreshold, bool m_bPause )
 {
 	ShaderManager* pShdrMngr = ShaderManager::getInstance();
 

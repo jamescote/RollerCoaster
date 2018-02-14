@@ -12,6 +12,7 @@ EnvironmentManager::EnvironmentManager()
 	// Initialize the Edge Threshold to 0 and 360 degrees.
 	m_fMinEdgeThreshold = 0.0f;
 	m_fMaxEdgeThreshold = 360.0f;
+	m_bPause = false;
 }
 
 // Gets the instance of the environment manager.
@@ -128,6 +129,26 @@ void EnvironmentManager::purgeEnvironment()
 	m_pLights.clear();
 }
 
+// Fetch the Frenet Frame of the first MeshObject found (Hack for assignment)
+mat4 EnvironmentManager::getFrenetFrame()
+{ 
+	mat4 pReturnVal = mat4( 1.0 );	// Default: return Identity Matrix
+
+	for ( vector<Object3D*>::iterator pObjIter = m_pObjects.begin();
+		 pObjIter != m_pObjects.end();
+		 ++pObjIter )
+	{
+		if ( !(*pObjIter)->getType().compare( "MeshObject" ) )
+		{
+			pReturnVal = (*pObjIter)->getFreNetFrames();
+			break;
+		}
+	}
+
+	// Return
+	return pReturnVal;
+}
+
 void EnvironmentManager::renderEnvironment( const vec3& vCamLookAt )
 {
 	// Local Variables
@@ -152,11 +173,11 @@ void EnvironmentManager::renderEnvironment( const vec3& vCamLookAt )
 			++pIter )
 		{
 			if ( nullptr != (*pIter) )
-				(*pIter)->draw( vCamLookAt, m_fMinEdgeThreshold, m_fMaxEdgeThreshold );
+				(*pIter)->draw( vCamLookAt, m_fMinEdgeThreshold, m_fMaxEdgeThreshold, m_bPause );
 		}
 	}
 
-	m_pLights[0]->draw( vCamLookAt, m_fMinEdgeThreshold, m_fMaxEdgeThreshold );
+	m_pLights[0]->draw( vCamLookAt, m_fMinEdgeThreshold, m_fMaxEdgeThreshold, m_bPause );
 }
 
 /*********************************************************************************\
