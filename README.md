@@ -14,3 +14,9 @@ Right-Click + Drag - Rotate around look-at position
 C - swaps between camera modes: Spherical (Viewing World Coord (0.0, 0.0, 0.0)), Spherical - Following Cart and Positioned behind the cart.
 P - Pauses animation
 
+Scene Modification:
+The scene can be modified in scene2.txt (scene is hardcoded into main.cpp) The cart is loaded in the Mesh section of the scene. The animation track being loaded can be changed here as well as the mesh itself and the texture used for the mesh.
+
+Note:
+There are some hard-coded restraints to satisfy the positioning of the camera and the cart. Namely, the Cart is rotated first to have it face properly toward the tangent and is translated upward a bit to put it on the track and not inside the track.
+Also, the camera grabs positioning information from the first Mesh object it gets from the environment. Therefore, if there were another cart or object loaded for whatever reason, it's not guaranteed that the camera will follow the desired object.
