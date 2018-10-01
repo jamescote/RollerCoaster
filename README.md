@@ -1,5 +1,5 @@
 Compiling on Windows:
-Compiled using MSVS 2015.  Will add one for 2013 as well in the future.  
+Compiled using MSVS 2015.  
 You'll need to set up OpenGL, GLEW, and trimesh.lib in the settings of the solution as required libraries.
 
 Compiling on Linux:
@@ -13,6 +13,7 @@ Mouse Wheel - Zoom
 Right-Click + Drag - Rotate around look-at position
 C - swaps between camera modes: Spherical (Viewing World Coord (0.0, 0.0, 0.0)), Spherical - Following Cart and Positioned behind the cart.
 P - Pauses animation
+F - Toggles Wireframe mode
 
 Scene Modification:
 The scene can be modified in scene2.txt (scene is hardcoded into main.cpp) The cart is loaded in the Mesh section of the scene. The animation track being loaded can be changed here as well as the mesh itself and the texture used for the mesh.
